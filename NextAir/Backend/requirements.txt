@@ -1,0 +1,20 @@
+# Database connectivity
+pyodbc
+python-dotenv
+
+# Flask framework and extensions
+Flask
+Flask-Smorest          # OpenAPI/Swagger REST API
+Flask-SQLAlchemy       # ORM for database models
+Flask-JWT-Extended     # JWT authentication
+Flask-CORS             # Cross-Origin Resource Sharing
+
+# Utilities
+passlib                # Password hashing
+marshmallow            # Object serialization/validation
+
+# WSGI server
+gunicorn               # Production HTTP server
+
+# Database drivers
+psycopg2-binary        # PostgreSQL adapter

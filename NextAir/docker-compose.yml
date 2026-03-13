@@ -1,0 +1,50 @@
+services:
+  # PostgreSQL database service
+  database:
+
+    image: postgres:17-alpine
+
+    # Environment variables for database configuration
+    environment:
+      POSTGRES_USER: ${DB_USER}        # Database username from system env
+      POSTGRES_PASSWORD: ${DB_PASSWORD} # Database password from system env
+      POSTGRES_DB: ${DB_NAME}          # Database name from system env
+
+    # Expose PostgreSQL port
+    ports:
+      - "5432:5432"
+
+    # Mount volume for data persistence
+    volumes:
+      - nextair_db:/var/lib/postgresql/data
+
+  backend:
+
+    # Build from Backend directory Dockerfile
+    build: ./Backend
+
+    # Load environment variables from .env file
+    env_file:
+      - .env
+    environment:
+      USER: ${DB_USER}
+      PASSWORD: ${DB_PASSWORD}
+      DB: ${DB_NAME}
+      HOST: database
+      PORT: 5432
+
+    # Mount source code for development (hot reload)
+    volumes:
+      - ./Backend:/app
+
+      # Expose Flask development server on port 5000
+    ports:
+      - "5000:5000"
+
+    # Wait for database container to start
+    depends_on:
+      - database
+
+# Named volume for database data
+volumes:
+  nextair_db:
