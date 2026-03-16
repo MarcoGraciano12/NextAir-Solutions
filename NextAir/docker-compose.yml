@@ -27,17 +27,22 @@ services:
     env_file:
       - .env
     environment:
-      USER: ${DB_USER}
-      PASSWORD: ${DB_PASSWORD}
-      DB: ${DB_NAME}
-      HOST: database
-      PORT: 5432
+      # Database variables
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: database
+      DB_PORT: 5432
 
-    # Mount source code for development (hot reload)
+      # Logging variables
+      LOG_LEVEL: DEBUG
+      LOG_BACKUP_COUNT: 30
+
     volumes:
       - ./Backend:/app
+      - ./logs:/logs
 
-      # Expose Flask development server on port 5000
+    # Expose Flask development server on port 5000
     ports:
       - "5000:5000"
 

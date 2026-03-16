@@ -9,6 +9,9 @@ Author: Marco Graciano
 Date: January 13, 2026
 """
 
+# Logs global configuration
+from controller import setup
+
 import os
 import secrets
 from db import db
@@ -18,13 +21,14 @@ from datetime import timedelta
 from flask import Flask, jsonify
 from models import BlocklistModel
 from flask_jwt_extended import JWTManager
+from controller.init_database import init_database
 
 
 app = Flask(__name__)
 CORS(app)
 
 # API configuration
-app.config["API_TITLE"] = "NextAI Cast"
+app.config["API_TITLE"] = "NextAir Solutions"
 app.config["API_VERSION"] = "v1"
 app.config["OPENAPI_VERSION"] = "3.1.3"
 
@@ -35,7 +39,7 @@ app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-
 
 # Database configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    f"postgresql://{os.getenv('USER')}:{os.getenv('PASSWORD')}@{os.getenv('HOST')}:{os.getenv('PORT')}/{os.getenv('DB')}"
+    f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PROPAGATE_EXCEPTIONS"] = True
@@ -123,7 +127,12 @@ def revoked_token_callback(jwt_header, jwt_payload):
 
 with app.app_context():
     db.create_all()
+    init_database(app)
 
     from resources import *
 
+api.register_blueprint(day_blueprint)
 api.register_blueprint(user_blueprint)
+api.register_blueprint(block_blueprint)
+api.register_blueprint(stream_blueprint)
+api.register_blueprint(station_blueprint)
