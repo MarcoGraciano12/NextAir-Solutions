@@ -18,3 +18,12 @@ gunicorn               # Production HTTP server
 
 # Database drivers
 psycopg2-binary        # PostgreSQL adapter
+
+# Audio array processing
+numpy
+
+# HTTP requests
+requests
+
+# Audio streaming (PyAV/FFmpeg)
+av
