@@ -197,16 +197,19 @@ class StreamSubject(Subject):
 
             # Process audio blocks continuously until stop signal received
             for block in generator:
+                if self.__stop_event.is_set():
+                    break
                 self.notify(block)
 
         except Exception as error:
             self.__logger.error(f"Critical exception in stream loop: {error}")
 
         finally:
+            self.__stream_input.close_input()
             self.__alive_subject.clear()
             self.__logger.info("Stream thread terminated and cleaned up")
 
-    def stop_stream(self):
+    def stop(self):
         """
         Stop the audio stream thread gracefully.
 
@@ -222,13 +225,14 @@ class StreamSubject(Subject):
                 self.__logger.warning("No active thread to stop")
                 return False
 
-            # Signal thread to stop
-            self.__stream_input.close_input()
             thread_to_join = self.__thread
-
-            # Wait for thread completion (inside lock prevents concurrent start)
-            thread_to_join.join()
             self.__thread = None
+
+        # Signal thread to stop
+        self.__stop_event.set()
+
+        # Wait for thread
+        thread_to_join.join()
 
         self.__logger.info("Stream thread stopped successfully")
         return True

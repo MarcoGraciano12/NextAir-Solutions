@@ -27,15 +27,14 @@ class StreamInput(InputBase):
         :param decoder: LPCM streaming decoder
         :param logger: Optional logger instance, creates new if not provided
         """
-        self.__name = name
-
         self.__lock = Lock()
-
-        # Logger instance for tracking operations
-        self.__logger = logger or getLogger(name)
 
         # Decoder instance for audio conversion
         self.__decoder = decoder
+
+        self.__name = name or self.__class__.__name__
+        # Logger instance for tracking operations
+        self.__logger = logger or getLogger(self.__name)
 
     @property
     def url(self) -> str:
@@ -47,32 +46,41 @@ class StreamInput(InputBase):
     @property
     def name(self) -> str:
         """
-        Get stream name.
+        Get input name.
 
         :return: Stream name identifier
         """
         return self.__name
 
     @property
-    def layout(self) -> str:
+    def decoder_name(self) -> str:
+        """
+        Get decoder name.
+
+        :return: Stream name identifier
+        """
+        return self.__decoder.name
+
+    @property
+    def channels(self) -> str:
         """
         Get number of audio channels.
         """
-        return self.__decoder.layout
+        return self.__decoder.channels
 
     @property
-    def samplerate(self) -> int:
+    def sample_rate(self) -> int:
         """
         Get audio sample rate in Hz.
         """
-        return self.__decoder.samplerate
+        return self.__decoder.sample_rate
 
     @property
-    def output_format(self) -> str:
+    def block_size(self) -> str:
         """
-        Get output audio format.
+        Get block size.
         """
-        return self.__decoder.output_format
+        return self.__decoder.block_size
 
     def __str__(self):
         """
@@ -80,7 +88,7 @@ class StreamInput(InputBase):
 
         :return: Formatted decoder info
         """
-        return f"stream: {self.__name}, {self.__decoder}"
+        return f"input_name: {self.__name}, {self.__decoder}"
 
     def __is_alive(self):
         """
@@ -123,5 +131,15 @@ class StreamInput(InputBase):
 
         :yield: PCM audio frames
         """
-        for frame in self.__decoder.data_generator():
-            yield frame
+        try:
+            while True:
+                block = self.__decoder.read()
+
+                if not block:
+                    return
+
+                yield block
+        except (BrokenPipeError, IOError, OSError) as error:
+            self.__logger.error(f"Pipe error in audio generator: {error}")
+            self.close_input()
+            return

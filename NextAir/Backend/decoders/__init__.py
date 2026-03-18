@@ -1,1 +1,1 @@
-from .ogg_decoder import OGGDecoder
+from .decoder import Decoder
