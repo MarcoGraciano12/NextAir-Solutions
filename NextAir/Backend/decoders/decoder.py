@@ -143,7 +143,7 @@ class Decoder:
 
     def start(self) -> bool:
         """
-        Start FFmpeg encoding process.
+        Start FFmpeg decoding process.
 
         :return: True if started successfully, False if already running or failed
         """
@@ -169,7 +169,7 @@ class Decoder:
 
     def stop(self) -> bool:
         """
-        Stop FFmpeg encoding process by force kill.
+        Stop FFmpeg decoding process by force kill.
 
         :return: True if stopped successfully, False if not running
         """
@@ -193,9 +193,8 @@ class Decoder:
 
     def read(self) -> bytes:
         """
-        Read encoded audio data from FFmpeg output.
+        Read decoded audio data from FFmpeg output.
 
-        :param size: Number of bytes to read
         :return: Encoded audio bytes or empty bytes if no data
         """
         if not self.is_running():
