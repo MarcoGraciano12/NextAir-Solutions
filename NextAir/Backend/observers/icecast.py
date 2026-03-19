@@ -144,7 +144,7 @@ class Icecast:
 
         return request
 
-    def connect(self, content_type: str = "application/ogg") -> bool:
+    def connect(self, content_type: str = "audio/ogg") -> bool:
         """
         Open connection to Icecast and send source headers.
 

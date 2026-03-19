@@ -105,11 +105,50 @@ class StreamObserver(Observer):
             self.__broadcast.send(data)
             time.sleep(0.001)
 
+    def restart_encoder(self) -> bool:
+        """
+        Attempt to restart the encoder.
+
+        :return: True if restarted successfully, False otherwise
+        """
+        self.__logger.error("Encoder deadlock detected, attempting restart")
+
+        if not self.__encoder.restart():
+            self.__logger.error("Failed to restart encoder, will retry")
+            return False
+
+        return True
+
+    def restart_broadcast(self) -> bool:
+        """
+        Restart broadcast connection with fresh encoder state.
+
+        :return: True if reconnected successfully, False otherwise
+        """
+        self.__logger.error("Broadcast connection lost, restarting encoder and reconnecting")
+
+        # Close existing broadcast connection
+        self.__broadcast.disconnect()
+
+        # Restart encoder to ensure OGG stream starts from valid page boundary
+        if not self.__encoder.restart():
+            self.__logger.error("Failed to restart encoder")
+            return False
+
+        # Reconnect to broadcast server
+        if not self.__broadcast.connect():
+            self.__logger.error("Failed to reconnect to broadcast")
+            return False
+
+        self.__logger.info("Broadcast reconnected with fresh encoder")
+        return True
+
     def __reload_loop(self):
         """
         Monitor encoder and broadcast health, restart if needed.
         """
         while not self.__stop_stream.is_set():
+            # Wait for interval or stop signal
             self.__stop_stream.wait(self.__reload_interval)
 
             if self.__stop_stream.is_set():
@@ -117,15 +156,11 @@ class StreamObserver(Observer):
 
             # Check encoder health
             if not self.__encoder.is_alive:
-                self.__logger.error("Encoder deadlock detected, attempting restart")
-                if not self.__encoder.restart():
-                    self.__logger.error("Failed to restart encoder, will retry")
+                self.restart_encoder()
 
             # Check broadcast health
             if not self.__broadcast.is_alive:
-                self.__logger.error("Broadcast connection lost, reconnecting")
-                self.__broadcast.disconnect()
-                self.__broadcast.connect()
+                self.restart_broadcast()
 
     def stop(self):
         """
@@ -138,22 +173,25 @@ class StreamObserver(Observer):
                 self.__logger.warning("Stream observer is not running")
                 return False
 
+            # Stop encoder
+            self.__encoder.stop()
+
+            # Clone connection
+            self.__broadcast.disconnect()
+
+            self.__stop_stream.set()
+
             thread_to_join = self.__thread
             reload_to_join = self.__reload_thread
+
             self.__thread = None
             self.__reload_thread = None
 
-        self.__stop_stream.set()
-
         # Wait for both threads to finish
         thread_to_join.join()
+
         if reload_to_join:
             reload_to_join.join()
-
-        # Stop encoder
-        self.__encoder.stop()
-        # Clone connection
-        self.__broadcast.disconnect()
 
         self.__logger.info("Stream observer stopped successfully")
         return True
