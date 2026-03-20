@@ -7,7 +7,6 @@ Includes helper methods for database operations and stream lookups.
 Author: Marco Graciano
 Date: 2026-03-13
 """
-from enum import unique
 
 from db import db
 
@@ -26,6 +25,9 @@ class StreamModel(db.Model):
 
     # Relationship: 1 stream → N blocks
     blocks = db.relationship('BlockModel', backref='stream', lazy=True, cascade='all, delete-orphan')
+    # Relationship: 1 stream → 1 broadcast (1-to-1)
+    broadcast = db.relationship('BroadcastModel', backref='stream', lazy=True, cascade='all, delete-orphan',
+                                uselist=False)
 
     @classmethod
     def find_by_id(cls, stream_id):
