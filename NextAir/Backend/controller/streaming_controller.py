@@ -13,7 +13,7 @@ from models import StationModel, StreamModel
 from logging import Logger, getLogger
 
 
-class StationController:
+class StreamingController:
     """
     Controller for managing radio stations.
     Handles CRUD operations with thread-safe access to station instances.
@@ -82,13 +82,10 @@ class StationController:
                     return None, "Station already exists"
 
                 # Save to database
-                station_model = StationModel(
-                    station_name=station_name,
-                    files_path=files_path
-                )
+                station_model = StationModel(station_name=station_name, files_path=files_path)
                 station_model.save_to_db()
 
-                # Create station object (need to import Station class)
+                # Create station object
                 self.__stations[station_name] = Station(station_name, files_path, self.__stream_input_controller)
 
             self.__logger.info(f"Station created: {station_name}")
@@ -98,18 +95,18 @@ class StationController:
             self.__logger.error(f"Error creating station: {error}")
             return None, f"Failed to create station: {str(error)}"
 
-    def retrieve_station(self, station_id: int):
+    def retrieve_station(self, station_name: str):
         """
-        Get a station from database by ID.
+        Get a station from database by name.
 
-        :param station_id: Station ID
+        :param station_name: Station name
         :return: Tuple (StationModel, message) - model is None on error
         """
         try:
-            station_model = StationModel.find_by_id(station_id)
+            station_model = StationModel.find_by_name(station_name)
 
             if not station_model:
-                self.__logger.warning(f"Station not found with ID: {station_id}")
+                self.__logger.warning(f"Station not found with name: {station_name}")
                 return None, "Station not found"
 
             return station_model, None
@@ -132,39 +129,39 @@ class StationController:
             self.__logger.error(f"Error retrieving stations: {error}")
             return None, f"Failed to retrieve stations: {str(error)}"
 
-    def delete_station(self, station_id: int):
+    def delete_station(self, station_name: str):
         """
         Delete a station and stop all its streams.
 
-        :param station_id: Station ID
+        :param station_name: Station name
         :return: Tuple (StationModel, message) - model is None on error
         """
         try:
             # Get station from database
-            station_model = StationModel.find_by_id(station_id)
+            station_model = StationModel.find_by_name(station_name)
 
             if not station_model:
-                self.__logger.warning(f"Station not found with ID: {station_id}")
+                self.__logger.warning(f"Station not found with name: {station_name}")
                 return None, "Station not found"
 
             # Get station object from memory
             with self.__lock:
-                station = self.__stations.get(station_model.station_name)
+                station = self.__stations.get(station_name)
 
             # Stop all streams if exists in memory
             if station:
                 if not station.stop_all_streams():
-                    self.__logger.error(f"Failed to stop streams for station: {station_model.station_name}")
+                    self.__logger.error(f"Failed to stop streams for station: {station_name}")
                     # return None, "Failed to stop station streams"
 
                 # Remove from memory after successful stop
                 with self.__lock:
-                    self.__stations.pop(station_model.station_name, None)
+                    self.__stations.pop(station_name, None)
 
             # Delete from database
             station_model.delete_from_db()
 
-            self.__logger.info(f"Station deleted: {station_model.station_name}")
+            self.__logger.info(f"Station deleted: {station_name}")
             return station_model, None
 
         except Exception as error:

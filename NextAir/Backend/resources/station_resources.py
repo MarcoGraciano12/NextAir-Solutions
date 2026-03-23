@@ -55,7 +55,7 @@ class StationCollection(MethodView):
         return station
 
 
-@blp.route("/stations/<int:station_id>")
+@blp.route("/stations/<string:station_name>")
 class StationItem(MethodView):
     """
     Resource for individual station operations.
@@ -63,14 +63,14 @@ class StationItem(MethodView):
 
     @blp.response(200, StationSchema)
     # @jwt_required()
-    def get(self, station_id):
+    def get(self, station_name):
         """
-        Get a station by ID.
+        Get a station by name.
 
-        :param station_id: Station ID
+        :param station_name: Station name
         :return: Station data
         """
-        station, error = controller.retrieve_station(station_id=station_id)
+        station, error = controller.retrieve_station(station_name=station_name)
 
         if error:
             abort(404, message=error)
@@ -113,14 +113,14 @@ class StationItem(MethodView):
 
     @blp.response(204)
     # @admin_required
-    def delete(self, station_id):
+    def delete(self, station_name):
         """
-        Delete a station by ID.
+        Delete a station by name.
 
-        :param station_id: Station ID
+        :param station_name: Station name
         :return: None
         """
-        station, error = controller.delete_station(station_id=station_id)
+        station, error = controller.delete_station(station_name=station_name)
 
         if error:
             abort(404, message=error)

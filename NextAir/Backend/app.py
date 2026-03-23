@@ -142,5 +142,3 @@ api.register_blueprint(stream_blueprint)
 api.register_blueprint(station_blueprint)
 api.register_blueprint(broadcast_blueprint)
 api.register_blueprint(stream_input_blueprint)
-
-# api.register_blueprint(streaming_resources)

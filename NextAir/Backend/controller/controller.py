@@ -7,10 +7,9 @@ Date: March 20, 2026
 Description: Main controller for managing radio stations and audio streaming operations.
 """
 
-from threading import Lock
 from logging import Logger, getLogger
 from .stream_input_controller import StreamInputController
-from .station_controller import StationController
+from .streaming_controller import StreamingController
 
 
 class Controller:
@@ -18,7 +17,7 @@ class Controller:
     def __init__(self, logger: Logger = None):
 
         self.__stream_input_controller = StreamInputController()
-        self.__station_controller = StationController(self.__stream_input_controller)
+        self.__station_controller = StreamingController(self.__stream_input_controller)
 
         self.__logger = logger or getLogger(self.__class__.__name__)
 
@@ -93,9 +92,9 @@ class Controller:
 
     def retrieve_station(self, **kwargs):
         """
-        Get a station by ID.
+        Get a station by name.
 
-        :param kwargs: Query parameters (station_id)
+        :param kwargs: Query parameters (station_name)
         :return: Tuple (StationModel, message) - model is None on error
         """
         return self.__station_controller.retrieve_station(**kwargs)
@@ -112,7 +111,7 @@ class Controller:
         """
         Delete a station.
 
-        :param kwargs: Query parameters (station_id)
+        :param kwargs: Query parameters (station_name)
         :return: Tuple (StationModel, message) - model is None on error
         """
         return self.__station_controller.delete_station(**kwargs)
@@ -164,4 +163,3 @@ class Controller:
         :return: Tuple (StreamModel, message) - model is None on error
         """
         return self.__station_controller.delete_stream(**kwargs)
-

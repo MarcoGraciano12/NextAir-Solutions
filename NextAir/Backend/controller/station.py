@@ -173,6 +173,10 @@ class Station:
         self.__logger.info(f"Stream deleted from memory: {stream_name}")
         return True
 
+    # ==================================================================================================================
+    # STREAMING
+    # ==================================================================================================================
+
     def start(self):
         pass
 
@@ -183,4 +187,16 @@ class Station:
         pass
 
     def reload(self):
+        pass
+
+    def start_all_streams(self):
+        pass
+
+    def stop_all_streams(self):
+        pass
+
+    def restart_all_streams(self):
+        pass
+
+    def reload_all_streams(self):
         pass
