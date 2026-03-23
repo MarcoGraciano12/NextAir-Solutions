@@ -38,6 +38,9 @@ services:
       LOG_LEVEL: DEBUG
       LOG_BACKUP_COUNT: 30
 
+      # Set timezone
+      TZ: America/Mexico_City
+
     volumes:
       - ./Backend:/app
       - ./logs:/logs
