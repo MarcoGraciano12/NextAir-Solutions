@@ -19,7 +19,7 @@ class StationModel(db.Model):
     __tablename__ = "stations"
 
     station_id = db.Column(db.Integer, primary_key=True)
-    station_name = db.Column(db.String(255), nullable=False)
+    station_name = db.Column(db.String(255), unique=True, nullable=False)
     files_path = db.Column(db.String(500), nullable=False)
 
     # Relationship: 1 station → N streams

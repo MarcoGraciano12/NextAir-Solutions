@@ -7,8 +7,9 @@ Date: March 20, 2026
 Description: Station object that manages multiple audio streams.
 """
 
-from .stream import Stream
 from models import StreamModel
+from threading import Lock
+from .stream import Stream
 from logging import Logger, getLogger
 
 
@@ -17,28 +18,22 @@ class Station:
     Radio station managing multiple audio streams.
     """
 
-    def __init__(self, station_id: int, station_name: str, files_path: str, logger: Logger = None, **kwargs):
+    def __init__(self, station_name: str, files_path: str, stream_input_controller, logger: Logger = None, **kwargs):
         """
         Initialize station instance.
 
-        :param station_id: Station unique identifier
         :param station_name: Station name
         :param files_path: Path to audio files directory
+        :param stream_input_controller: Stream inputs controller reference
         :param logger: Logger instance
         :return: None
         """
         self.__streams = {}
-        self.__station_id = station_id
+        self.__lock = Lock()
         self.__files_path = files_path
         self.__station_name = station_name
+        self.__stream_input_controller = stream_input_controller
         self.__logger = logger or getLogger(self.__station_name)
-
-    @property
-    def station_id(self) -> int:
-        """
-        Get station ID.
-        """
-        return self.__station_id
 
     @property
     def station_name(self) -> str:
@@ -47,12 +42,30 @@ class Station:
         """
         return self.__station_name
 
+    @station_name.setter
+    def station_name(self, value: str):
+        """
+        Set station name.
+
+        :param value: New station name
+        """
+        self.__station_name = value
+
     @property
     def files_path(self) -> str:
         """
         Get files path.
         """
         return self.__files_path
+
+    @files_path.setter
+    def files_path(self, value: str):
+        """
+        Set files path.
+
+        :param value: New files path
+        """
+        self.__files_path = value
 
     def __str__(self) -> str:
         """
@@ -62,77 +75,112 @@ class Station:
         """
         return f"station_name: {self.__station_name}, files_path: {self.__files_path}"
 
-    def start(self, stream_name: str) -> dict:
+    # ==================================================================================================================
+    # STREAMS
+    # ==================================================================================================================
+
+    def initialize(self, station_id: int):
         """
-        Start stream transmission.
+        Load existing streams from database into memory.
+
+        :param station_id: Station ID
+        :return: None
+        """
+        try:
+            self.__logger.info("Initializing streams from database")
+
+            # Retrieve all stream records for this station
+            models = StreamModel.find_by_station_id(station_id)
+
+            # Create in-memory objects for each database record
+            for model in models:
+                stream = Stream(model.stream_name, model.external_id)
+
+                # Register stream
+                self.__streams[model.stream_name] = stream
+
+            self.__logger.info(f"Loaded {len(models)} streams from database")
+
+        except Exception as error:
+            self.__logger.error(f"Failed to initialize streams: {error}")
+
+    def create_stream(self, station_id: int, **kwargs):
+        """
+        Create a new stream for this station.
+
+        :param station_id: Station ID
+        :param kwargs: Stream configuration parameters
+        :return: Tuple (StreamModel, message) - model is None on error
+        """
+        try:
+            stream_name = kwargs.get("stream_name")
+            external_id = kwargs.get("external_id")
+
+            # Validate name uniqueness
+            if StreamModel.find_by_name(stream_name):
+                self.__logger.warning(f"Stream name already exists: {stream_name}")
+                return None, "A stream with that name already exists"
+
+            # Validate external_id uniqueness
+            if StreamModel.find_by_external_id(external_id):
+                self.__logger.warning(f"Stream external_id already exists: {external_id}")
+                return None, "A stream with that external ID already exists"
+
+            with self.__lock:
+                # Check if stream already exists in memory
+                if stream_name in self.__streams:
+                    self.__logger.warning(f"Stream already in memory: {stream_name}")
+                    return None, "Stream already exists"
+
+                # Save to database
+                stream_model = StreamModel(station_id=station_id, stream_name=stream_name, external_id=external_id)
+                stream_model.save_to_db()
+
+                # Create stream object
+                self.__streams[stream_name] = Stream(stream_name, external_id)
+
+            self.__logger.info(f"Stream created: {stream_name}")
+            return stream_model, None
+
+        except Exception as error:
+            self.__logger.error(f"Error creating stream: {error}")
+            return None, f"Failed to create stream: {str(error)}"
+
+    def delete_stream(self, stream_name: str):
+        """
+        Stop and remove stream from memory.
 
         :param stream_name: Stream name
-        :return: Dict with status and message
+        :return: True if deleted successfully, False otherwise
         """
-        # Check cache
-        stream = self.__streams.get(stream_name)
-
-        if stream:
-            return stream.start()
-
-        # Load from DB
-        stream_model = StreamModel.find_by_name(stream_name)
-
-        if not stream_model:
-            self.__logger.warning(f"Stream '{stream_name}' not found")
-            return {'status': False, 'message': f"Stream '{stream_name}' not found"}
-
-        # Create and start
-        stream = Stream(**stream_model.to_dict())
-        self.__logger.info(f"Stream loaded: {stream}")
-        result = stream.start()
-
-        if not result['status']:
-            self.__logger.error(f"Failed to start stream '{stream_name}': {result['message']}")
-            return result
-
-        # Cache only if started successfully
-        self.__streams[stream_name] = stream
-        return result
-
-    def stop(self, stream_name: str) -> dict:
-        """
-        Stop stream transmission.
-
-        :param stream_name: Stream name
-        :return: Dict with status and message
-        """
-        stream = self.__streams.get(stream_name)
+        # Get stream from memory
+        with self.__lock:
+            stream = self.__streams.get(stream_name)
 
         if not stream:
-            self.__logger.warning(f"Stream '{stream_name}' not found in memory")
-            return {'status': False, 'message': f"Stream '{stream_name}' not active"}
+            self.__logger.info(f"Stream not in streams dict: {stream_name}")
+            return True
 
-        result = stream.stop()
-        return result
+        # Stop stream operations
+        if not stream.stop():
+            self.__logger.error(f"Failed to stop stream: {stream_name}")
+            return False
 
-    def restart(self, stream_name: str) -> dict:
-        """
-        Restart stream transmission.
+        # Remove from memory after successful stop
+        with self.__lock:
+            self.__streams.pop(stream_name, None)
 
-        :param stream_name: Stream name
-        :return: Dict with status and message
-        """
-        self.stop(stream_name)
-        return self.start(stream_name)
+        self.__logger.info(f"Stream deleted from memory: {stream_name}")
+        return True
 
-    def reload(self, stream_name: str) -> dict:
-        """
-        Reload stream configuration.
+    def start(self):
+        pass
 
-        :param stream_name: Stream name
-        :return: Dict with status and message
-        """
-        stream = self.__streams.get(stream_name)
+    def stop(self):
+        pass
 
-        if not stream:
-            self.__logger.warning(f"Stream '{stream_name}' not found in memory")
-            return {'status': False, 'message': f"Stream '{stream_name}' not active"}
+    def restart(self):
+        pass
 
-        result = stream.reload()
-        return result
+    def reload(self):
+        pass

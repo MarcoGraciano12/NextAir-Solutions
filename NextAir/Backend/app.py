@@ -129,6 +129,10 @@ with app.app_context():
     db.create_all()
     init_database(app)
 
+    from controller import controller
+
+    controller.initialize()
+
     from resources import *
 
 api.register_blueprint(day_blueprint)
@@ -139,4 +143,4 @@ api.register_blueprint(station_blueprint)
 api.register_blueprint(broadcast_blueprint)
 api.register_blueprint(stream_input_blueprint)
 
-api.register_blueprint(streaming_resources)
+# api.register_blueprint(streaming_resources)
