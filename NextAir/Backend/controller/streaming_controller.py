@@ -293,10 +293,53 @@ class StreamingController:
     # ==================================================================================================================
 
     def start_transmission(self, station_name: str, stream_name: str):
-        pass
+        """
+        Start a station's transmission
+
+        :param station_name: name of the station
+        :param stream_name: name of the stream
+        :return: tuple
+        """
+        with self.__lock:
+            station = self.__stations.get(station_name, None)
+
+        if not station:
+            self.__logger.info(f"Station {station_name} not found in memory, trying on db")
+            station_model = StationModel.find_by_name(station_name)
+
+            if not station_model:
+                self.__logger.warning(f"Station {station_name} not found in db")
+                return False, "Station not found in db"
+
+            station = Station(station_model.station_name, station_model.files_path, self.__stream_input_controller)
+
+            with self.__lock:
+                if station_name not in self.__stations:
+                    self.__stations[station_name] = station
+                    self.__logger.info(f"Station {station_name} added to memory")
+                else:
+                    # Another thread added it, use existing instance
+                    station = self.__stations[station_name]
+                    self.__logger.info(f"Station {station_name} already in memory (added by another thread)")
+
+        return station.start(stream_name)
 
     def stop_transmission(self, station_name: str, stream_name: str):
-        pass
+        """
+        Stop a station's transmission
+
+        :param station_name: name of the station
+        :param stream_name: name of the stream
+        :return: tuple
+        """
+        with self.__lock:
+            station = self.__stations.get(station_name, None)
+
+        if not station:
+            self.__logger.warning(f"Can't stop {stream_name}, {station_name} not found in memory")
+            return False, "Station not found in memory"
+
+        return station.stop(stream_name)
 
     def restart_transmission(self, station_name: str, stream_name: str):
         pass

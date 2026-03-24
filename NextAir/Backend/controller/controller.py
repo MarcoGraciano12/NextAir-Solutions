@@ -27,8 +27,9 @@ class Controller:
 
         :return: None
         """
-        self.__stream_input_controller.initialize()
-        self.__transmission_controller.initialize()
+        pass
+        # self.__stream_input_controller.initialize()
+        # self.__transmission_controller.initialize()
 
     # ==================================================================================================================
     # STREAM INPUTS
@@ -169,10 +170,22 @@ class Controller:
     # ==================================================================================================================
 
     def start_transmission(self, **kwargs):
-        pass
+        """
+        Start a station's transmission
+
+        :param kwargs: Stream data (station_name, stream_name)
+        :return: tuple
+        """
+        return self.__transmission_controller.start_transmission(**kwargs)
 
     def stop_transmission(self, **kwargs):
-        pass
+        """
+        Stop a station's transmission
+
+        :param kwargs: Stream data (station_name, stream_name)
+        :return: tuple
+        """
+        return self.__transmission_controller.stop_transmission(**kwargs)
 
     def restart_transmission(self, **kwargs):
         pass

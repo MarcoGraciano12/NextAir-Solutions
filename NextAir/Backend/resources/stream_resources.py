@@ -11,7 +11,7 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from flask_jwt_extended import jwt_required
 from controller import admin_required, controller
-from schemas import StreamSchema, StreamUpdateSchema, PlainStreamSchema, StreamCreateSchema
+from schemas import StreamSchema, StreamUpdateSchema, PlainStreamSchema, StreamCreateSchema, Transmission
 
 blp = Blueprint("Streams", __name__, description="Stream management operations")
 
@@ -130,24 +130,261 @@ class StreamItem(MethodView):
             abort(404, message=error)
 
 
-@blp.route("/stations/<string:station_name>/streams")
-class StationStreamCollection(MethodView):
+# ==================================================================================================================
+# SINGLE TRANSMISSION
+# ==================================================================================================================
+
+@blp.route("/streams/start/<string:station_name>/<string:stream_name>")
+class StartTransmission(MethodView):
     """
-    Resource for station-specific stream operations.
+    Start audio stream transmission.
     """
 
-    @blp.response(200, StreamSchema(many=True))
+    @blp.response(204)
     # @jwt_required()
-    def get(self, station_name):
+    def post(self, station_name, stream_name):
         """
-        Get all streams for a station.
+        Start streaming for specified station and stream.
 
-        :param station_name: Station name
-        :return: List of streams for the station
+        :param station_name: Station identifier
+        :param stream_name: Stream identifier
+        :return: Operation status
         """
-        streams, error = controller.get_streams_for_station(station_name=station_name)
+        status, error, = controller.start_transmission(station_name=station_name, stream_name=stream_name)
 
         if error:
-            abort(404, message=error)
+            abort(400, message=error)
 
-        return streams
+
+@blp.route("/streams/stop/<string:station_name>/<string:stream_name>")
+class StopTransmission(MethodView):
+    """
+    Stop audio stream transmission.
+    """
+
+    @blp.response(204)
+    # @jwt_required()
+    def post(self, station_name, stream_name):
+        """
+        Stop streaming for specified station and stream.
+
+        :param station_name: Station identifier
+        :param stream_name: Stream identifier
+        :return: Operation status
+        """
+        status, error, = controller.stop_transmission(station_name=station_name, stream_name=stream_name)
+
+        if error:
+            abort(400, message=error)
+
+
+@blp.route("/streams/restart/<string:station_name>/<string:stream_name>")
+class RestartTransmission(MethodView):
+    """
+    Restart audio stream transmission.
+    """
+
+    @blp.response(204)
+    # @jwt_required()
+    def post(self, station_name, stream_name):
+        """
+        Restart streaming for specified station and stream.
+
+        :param station_name: Station identifier
+        :param stream_name: Stream identifier
+        :return: Operation status
+        """
+        # TODO: Get stream instance, call stop() then start()
+
+        return {"station_name": station_name, "stream_name": stream_name}
+
+
+@blp.route("/streams/reload/<string:station_name>/<string:stream_name>")
+class ReloadTransmission(MethodView):
+    """
+    Reload audio stream configuration.
+    """
+
+    @blp.response(204)
+    # @jwt_required()
+    def post(self, station_name, stream_name):
+        """
+        Reload configuration for specified station and stream.
+
+        :param station_name: Station identifier
+        :param stream_name: Stream identifier
+        :return: Operation status
+        """
+        # TODO: Get stream instance, reload config, restart if running
+
+        return {"station_name": station_name, "stream_name": stream_name}
+
+
+# ==================================================================================================================
+# STATION TRANSMISSIONS
+# ==================================================================================================================
+
+
+@blp.route("/streams/start/<string:station_name>")
+class StartStationTransmission(MethodView):
+    """
+    Start all streams for a station.
+    """
+
+    @blp.response(200)
+    # @jwt_required()
+    def post(self, data):
+        """
+        Start all stream transmissions for specified station.
+
+        :param data: Request data with station_name
+        :return: Operation status
+        """
+        station_name = data.get("station_name")
+        # TODO: Get all streams for station and start them
+
+        return {"station_name": station_name, "status": "started"}
+
+
+@blp.route("/streams/stop/<string:station_name>")
+class StopStationTransmission(MethodView):
+    """
+    Stop all streams for a station.
+    """
+
+    @blp.response(200)
+    # @jwt_required()
+    def post(self, data):
+        """
+        Stop all stream transmissions for specified station.
+
+        :param data: Request data with station_name
+        :return: Operation status
+        """
+        station_name = data.get("station_name")
+        # TODO: Get all streams for station and stop them
+
+        return {"station_name": station_name, "status": "stopped"}
+
+
+@blp.route("/streams/restart/<string:station_name>")
+class RestartStationTransmission(MethodView):
+    """
+    Restart all streams for a station.
+    """
+
+    @blp.response(200)
+    # @jwt_required()
+    def post(self, data):
+        """
+        Restart all stream transmissions for specified station.
+
+        :param data: Request data with station_name
+        :return: Operation status
+        """
+        station_name = data.get("station_name")
+        # TODO: Get all streams for station, stop and start them
+
+        return {"station_name": station_name, "status": "restarted"}
+
+
+@blp.route("/streams/reload/<string:station_name>")
+class ReloadStationTransmission(MethodView):
+    """
+    Reload configuration for all streams in a station.
+    """
+
+    @blp.response(200)
+    # @jwt_required()
+    def post(self, data):
+        """
+        Reload configuration for all streams in specified station.
+
+        :param data: Request data with station_name
+        :return: Operation status
+        """
+        station_name = data.get("station_name")
+        # TODO: Get all streams for station, reload config
+
+        return {"station_name": station_name, "status": "reloaded"}
+
+
+# ==================================================================================================================
+# ALL TRANSMISSIONS
+# ==================================================================================================================
+
+
+@blp.route("/streams/start")
+class StartAllTransmissions(MethodView):
+    """
+    Start all station transmissions.
+    """
+
+    @blp.response(200)
+    # @jwt_required()
+    def post(self):
+        """
+        Start all stream transmissions for all stations.
+
+        :return: Operation status
+        """
+        # TODO: Get all stations and start all streams
+
+        return {"status": "all_started"}
+
+
+@blp.route("/streams/stop")
+class StopAllTransmissions(MethodView):
+    """
+    Stop all station transmissions.
+    """
+
+    @blp.response(200)
+    # @jwt_required()
+    def post(self):
+        """
+        Stop all stream transmissions for all stations.
+
+        :return: Operation status
+        """
+        # TODO: Get all stations and stop all streams
+
+        return {"status": "all_stopped"}
+
+
+@blp.route("/streams/restart")
+class RestartAllTransmissions(MethodView):
+    """
+    Restart all station transmissions.
+    """
+
+    @blp.response(200)
+    # @jwt_required()
+    def post(self):
+        """
+        Restart all stream transmissions for all stations.
+
+        :return: Operation status
+        """
+        # TODO: Get all stations, stop and start all streams
+
+        return {"status": "all_restarted"}
+
+
+@blp.route("/streams/reload")
+class ReloadAllTransmissions(MethodView):
+    """
+    Reload configuration for all transmissions.
+    """
+
+    @blp.response(200)
+    # @jwt_required()
+    def post(self):
+        """
+        Reload configuration for all streams in all stations.
+
+        :return: Operation status
+        """
+        # TODO: Get all stations, reload config for all streams
+
+        return {"status": "all_reloaded"}

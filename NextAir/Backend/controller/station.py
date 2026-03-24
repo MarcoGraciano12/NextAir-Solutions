@@ -223,10 +223,50 @@ class Station:
     # ==================================================================================================================
 
     def start(self, stream_name: str):
-        pass
+        """
+        Start a station's transmission
+
+        :param stream_name: name of the stream
+        :return: tuple
+        """
+        with self.__lock:
+            stream = self.__streams.get(stream_name, None)
+
+        if not stream:
+            self.__logger.info(f"Stream {stream_name} not found in memory, trying on db")
+            stream_model = StreamModel.find_by_name(stream_name)
+
+            if not stream_model:
+                self.__logger.warning(f"Stream {stream_name} not found in db")
+                return False, "Stream not found in db"
+
+            stream = Stream(stream_model.stream_name, stream_model.external_id)
+
+            with self.__lock:
+                if stream_name not in self.__streams:
+                    self.__streams[stream_name] = stream
+                    self.__logger.info(f"Stream {stream_name} added to memory")
+                else:
+                    stream = self.__streams[stream_name]
+                    self.__logger.info(f"Stream {stream_name} already in memory (added by another thread)")
+
+        return stream.start()
 
     def stop(self, stream_name: str):
-        pass
+        """
+        Stop a station's transmission
+
+        :param stream_name: name of the stream
+        :return: tuple
+        """
+        with self.__lock:
+            stream = self.__streams.get(stream_name, None)
+
+        if not stream:
+            self.__logger.warning(f"Can't stop {stream_name}, stream not found in memory")
+            return False, "Stream not found in memory"
+
+        return stream.stop()
 
     def restart(self, stream_name: str):
         pass

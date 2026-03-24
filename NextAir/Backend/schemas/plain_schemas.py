@@ -126,3 +126,10 @@ class BlockUpdateSchema(Schema):
     end_time = fields.Time()
     source_name = fields.Str()
     schedule_name = fields.Str()
+
+
+# Transmission Resources
+
+class Transmission(Schema):
+    station_name = fields.Str(required=True)
+    stream_name = fields.Str(required=True)
