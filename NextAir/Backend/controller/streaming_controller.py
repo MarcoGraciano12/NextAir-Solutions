@@ -352,10 +352,60 @@ class StreamingController:
     # ==================================================================================================================
 
     def start_station_transmissions(self, station_name: str):
-        pass
+        """
+        Start all station transmissions
+
+        :param station_name: name of the station
+        :return: tuple
+        """
+        with self.__lock:
+            station = self.__stations.get(station_name, None)
+
+        station_model = StationModel.find_by_name(station_name)
+
+        if not station_model:
+            self.__logger.warning(f"Station {station_name} not found in db")
+
+            if station:
+                self.__logger.info(f"Removing station {station_name} from memory")
+
+                self.stop_station_transmissions(station_name)
+
+                with self.__lock:
+                    if station_name in self.__stations:
+                        self.__stations.pop(station_name, None)
+
+            return False, "Station not found in db"
+
+        if not station:
+            station = Station(station_model.station_name, station_model.files_path, self.__stream_input_controller)
+
+            with self.__lock:
+                if station_name not in self.__stations:
+                    self.__stations[station_name] = station
+                    self.__logger.info(f"Station {station_name} added to memory")
+                else:
+                    station = self.__stations[station_name]
+                    self.__logger.info(f"Station {station_name} already in memory (added by another thread)")
+
+        return station.start_all_streams(station_model.station_id)
+
 
     def stop_station_transmissions(self, station_name: str):
-        pass
+        """
+        Stop all station transmissions
+
+        :param station_name: name of the station
+        :return: tuple
+        """
+        with self.__lock:
+            station = self.__stations.get(station_name, None)
+
+        if not station:
+            self.__logger.warning(f"Can't stop {station_name} transmissions, station not found in memory")
+            return False, "Station not found in memory"
+
+        return station.stop_all_streams()
 
     def restart_station_transmissions(self, station_name: str):
         pass

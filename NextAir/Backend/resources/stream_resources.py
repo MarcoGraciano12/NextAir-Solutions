@@ -231,19 +231,19 @@ class StartStationTransmission(MethodView):
     Start all streams for a station.
     """
 
-    @blp.response(200)
+    @blp.response(204)
     # @jwt_required()
-    def post(self, data):
+    def post(self, station_name):
         """
         Start all stream transmissions for specified station.
 
-        :param data: Request data with station_name
+        :param station_name: name of the station
         :return: Operation status
         """
-        station_name = data.get("station_name")
-        # TODO: Get all streams for station and start them
+        status, error = controller.start_station_transmissions(station_name=station_name)
 
-        return {"station_name": station_name, "status": "started"}
+        if error:
+            abort(400, message=error)
 
 
 @blp.route("/streams/stop/<string:station_name>")
@@ -252,19 +252,19 @@ class StopStationTransmission(MethodView):
     Stop all streams for a station.
     """
 
-    @blp.response(200)
+    @blp.response(204)
     # @jwt_required()
-    def post(self, data):
+    def post(self, station_name):
         """
         Stop all stream transmissions for specified station.
 
-        :param data: Request data with station_name
+        :param station_name: name of the station
         :return: Operation status
         """
-        station_name = data.get("station_name")
-        # TODO: Get all streams for station and stop them
+        status, error = controller.stop_station_transmissions(station_name=station_name)
 
-        return {"station_name": station_name, "status": "stopped"}
+        if error:
+            abort(400, message=error)
 
 
 @blp.route("/streams/restart/<string:station_name>")

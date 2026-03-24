@@ -198,10 +198,23 @@ class Controller:
     # ==================================================================================================================
 
     def start_station_transmissions(self, **kwargs):
-        pass
+        """
+        Start all station transmissions
+
+        :param kwargs: Station data (station_name)
+        :return: tuple
+        """
+        return self.__transmission_controller.start_station_transmissions(**kwargs)
 
     def stop_station_transmissions(self, **kwargs):
-        pass
+        """
+        Stop all station transmissions
+
+        :param kwargs: Station data (station_name)
+        :return: tuple
+        """
+        return self.__transmission_controller.stop_station_transmissions(**kwargs)
+
 
     def restart_station_transmissions(self, **kwargs):
         pass

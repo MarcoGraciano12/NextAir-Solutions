@@ -278,11 +278,37 @@ class Station:
     # STATION TRANSMISSIONS
     # ==================================================================================================================
 
-    def start_all_streams(self):
-        pass
+    def start_all_streams(self, station_id):
+        """
+        Start all streams for the station.
+
+        :param station_id: Station database ID
+        :return: Tuple (success, error_message)
+        """
+        streams = self.get_streams_by_station_id(station_id)
+
+        if not streams:
+            self.__logger.warning(f"No available streams for station {self.__station_name}")
+            return False, "No available streams"
+
+        for stream in streams:
+            self.start(stream.stream_name)
+
+        return True, None
 
     def stop_all_streams(self):
-        pass
+        """
+        Stop all streams from the station.
+
+        :return: tuple
+        """
+        with self.__lock:
+            streams = list(self.__streams.keys())
+
+        for stream_name in streams:
+            self.stop(stream_name)
+
+        return True, None
 
     def restart_all_streams(self):
         pass
