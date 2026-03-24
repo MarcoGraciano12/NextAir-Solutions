@@ -158,36 +158,85 @@ class Station:
             stream = self.__streams.get(stream_name)
 
         if not stream:
-            self.__logger.info(f"Stream not in streams dict: {stream_name}")
-            return True
+            self.__logger.info(f"Stream not in memory: {stream_name}")
+            return None, "Stream not found"
 
         # Stop stream operations
         if not stream.stop():
             self.__logger.error(f"Failed to stop stream: {stream_name}")
-            return False
+            return None, "Failed to stop stream"
 
         # Remove from memory after successful stop
         with self.__lock:
             self.__streams.pop(stream_name, None)
 
         self.__logger.info(f"Stream deleted from memory: {stream_name}")
-        return True
+        return self.delete_stream_by_name(stream_name)
+
+    @staticmethod
+    def find_stream_by_name(stream_name: str):
+        """
+        Get a stream by name.
+
+        :param stream_name: Stream name
+        :return: Tuple (StreamModel, message) - model is None on error
+        """
+        return StreamModel.find_by_name(stream_name)
+
+    @staticmethod
+    def get_all_streams():
+        """
+        Get all streams from database.
+
+        :return: Tuple (list of StreamModel, message) - list is None on error
+        """
+        return StreamModel.get_all()
+
+    @staticmethod
+    def get_streams_by_station_id(station_id: int):
+        """
+        Get all streams for a station by ID.
+
+        :param station_id: Station ID
+        :return: Tuple (list of StreamModel, message) - list is None on error
+        """
+        return StreamModel.find_by_station_id(station_id)
+
+    @staticmethod
+    def delete_stream_by_name(stream_name: str):
+        """
+        Delete a stream by name.
+
+        :param stream_name: Stream name
+        :return: Tuple (StreamModel, message) - model is None on error
+        """
+        stream_model = StreamModel.find_by_name(stream_name)
+
+        if not stream_model:
+            return None, "Stream not found"
+
+        stream_model.delete_from_db()
+        return stream_model, None
 
     # ==================================================================================================================
-    # STREAMING
+    # SINGLE TRANSMISSION
     # ==================================================================================================================
 
-    def start(self):
+    def start(self, stream_name: str):
         pass
 
-    def stop(self):
+    def stop(self, stream_name: str):
         pass
 
-    def restart(self):
+    def restart(self, stream_name: str):
         pass
 
-    def reload(self):
+    def reload(self, stream_name: str):
         pass
+
+    # ==================================================================================================================
+    # STATION TRANSMISSIONS
+    # ==================================================================================================================
 
     def start_all_streams(self):
         pass

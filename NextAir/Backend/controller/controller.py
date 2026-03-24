@@ -17,7 +17,7 @@ class Controller:
     def __init__(self, logger: Logger = None):
 
         self.__stream_input_controller = StreamInputController()
-        self.__station_controller = StreamingController(self.__stream_input_controller)
+        self.__transmission_controller = StreamingController(self.__stream_input_controller)
 
         self.__logger = logger or getLogger(self.__class__.__name__)
 
@@ -28,7 +28,7 @@ class Controller:
         :return: None
         """
         self.__stream_input_controller.initialize()
-        self.__station_controller.initialize()
+        self.__transmission_controller.initialize()
 
     # ==================================================================================================================
     # STREAM INPUTS
@@ -88,7 +88,7 @@ class Controller:
         :param kwargs: Station configuration parameters
         :return: Tuple (StationModel, message) - model is None on error
         """
-        return self.__station_controller.create_station(**kwargs)
+        return self.__transmission_controller.create_station(**kwargs)
 
     def retrieve_station(self, **kwargs):
         """
@@ -97,7 +97,7 @@ class Controller:
         :param kwargs: Query parameters (station_name)
         :return: Tuple (StationModel, message) - model is None on error
         """
-        return self.__station_controller.retrieve_station(**kwargs)
+        return self.__transmission_controller.retrieve_station(**kwargs)
 
     def retrieve_all_stations(self):
         """
@@ -105,7 +105,7 @@ class Controller:
 
         :return: Tuple (list of StationModel, message) - list is None on error
         """
-        return self.__station_controller.retrieve_all_stations()
+        return self.__transmission_controller.retrieve_all_stations()
 
     def delete_station(self, **kwargs):
         """
@@ -114,7 +114,7 @@ class Controller:
         :param kwargs: Query parameters (station_name)
         :return: Tuple (StationModel, message) - model is None on error
         """
-        return self.__station_controller.delete_station(**kwargs)
+        return self.__transmission_controller.delete_station(**kwargs)
 
     # ==================================================================================================================
     # STREAMS
@@ -127,7 +127,7 @@ class Controller:
         :param kwargs: Stream configuration parameters (station_name, stream_name, external_id, etc.)
         :return: Tuple (StreamModel, message) - model is None on error
         """
-        return self.__station_controller.create_stream(**kwargs)
+        return self.__transmission_controller.create_stream(**kwargs)
 
     def get_stream(self, **kwargs):
         """
@@ -136,7 +136,7 @@ class Controller:
         :param kwargs: Query parameters (station_name, stream_name)
         :return: Tuple (StreamModel, message) - model is None on error
         """
-        return self.__station_controller.retrieve_stream(**kwargs)
+        return self.__transmission_controller.retrieve_stream(**kwargs)
 
     def get_all_streams(self):
         """
@@ -144,7 +144,7 @@ class Controller:
 
         :return: Tuple (list of StreamModel, message) - list is None on error
         """
-        return self.__station_controller.retrieve_all_streams()
+        return self.__transmission_controller.retrieve_all_streams()
 
     def get_streams_for_station(self, **kwargs):
         """
@@ -153,7 +153,7 @@ class Controller:
         :param kwargs: Query parameters (station_name)
         :return: Tuple (list of StreamModel, message) - list is None on error
         """
-        return self.__station_controller.retrieve_streams_for_station(**kwargs)
+        return self.__transmission_controller.retrieve_streams_for_station(**kwargs)
 
     def delete_stream(self, **kwargs):
         """
@@ -162,4 +162,52 @@ class Controller:
         :param kwargs: Query parameters (station_name, stream_name)
         :return: Tuple (StreamModel, message) - model is None on error
         """
-        return self.__station_controller.delete_stream(**kwargs)
+        return self.__transmission_controller.delete_stream(**kwargs)
+
+    # ==================================================================================================================
+    # SINGLE TRANSMISSION
+    # ==================================================================================================================
+
+    def start_transmission(self, **kwargs):
+        pass
+
+    def stop_transmission(self, **kwargs):
+        pass
+
+    def restart_transmission(self, **kwargs):
+        pass
+
+    def reload_transmission(self, **kwargs):
+        pass
+
+    # ==================================================================================================================
+    # STATION TRANSMISSIONS
+    # ==================================================================================================================
+
+    def start_station_transmissions(self, **kwargs):
+        pass
+
+    def stop_station_transmissions(self, **kwargs):
+        pass
+
+    def restart_station_transmissions(self, **kwargs):
+        pass
+
+    def reload_station_transmissions(self, **kwargs):
+        pass
+
+    # ==================================================================================================================
+    # ALL TRANSMISSIONS
+    # ==================================================================================================================
+
+    def start_all_transmissions(self, **kwargs):
+        pass
+
+    def stop_all_transmissions(self, **kwargs):
+        pass
+
+    def restart_all_transmissions(self, **kwargs):
+        pass
+
+    def reload_all_transmissions(self, **kwargs):
+        pass

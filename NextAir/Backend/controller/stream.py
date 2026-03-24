@@ -80,43 +80,19 @@ class Stream:
         """
         return f"stream_name: {self.__stream_name}, external_id: {self.__external_id}, observer: {self.__observer}"
 
+    # ==================================================================================================================
+    # SINGLE TRANSMISSION
+    # ==================================================================================================================
 
+    def start(self):
+        pass
 
+    def stop(self):
+        pass
 
+    def restart(self):
+        pass
 
-    #
-    # def start(self) -> dict:
-    #     """
-    #     Start stream transmission.
-    #
-    #     :return: Dict with status and message
-    #     """
-    #     self.__logger.info("Stream started successfully")
-    #     return {'status': True}
-    #
-    # def stop(self) -> dict:
-    #     """
-    #     Stop stream transmission.
-    #
-    #     :return: Dict with status and message
-    #     """
-    #     self.__logger.info("Stream stopped successfully")
-    #     return {'status': True}
-    #
-    # def restart(self) -> dict:
-    #     """
-    #     Restart stream transmission.
-    #
-    #     :return: Dict with status and message
-    #     """
-    #     self.__logger.info("Stream restarted successfully")
-    #     return {'status': True}
-    #
-    # def reload(self) -> dict:
-    #     """
-    #     Reload stream configuration.
-    #
-    #     :return: Dict with status and message
-    #     """
-    #     self.__logger.info("Stream reloaded successfully")
-    #     return {'status': True}
+    def reload(self):
+        pass
+

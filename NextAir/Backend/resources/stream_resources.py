@@ -11,7 +11,7 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from flask_jwt_extended import jwt_required
 from controller import admin_required, controller
-from schemas import StreamSchema, StreamUpdateSchema, PlainStreamSchema
+from schemas import StreamSchema, StreamUpdateSchema, PlainStreamSchema, StreamCreateSchema
 
 blp = Blueprint("Streams", __name__, description="Stream management operations")
 
@@ -37,7 +37,7 @@ class StreamCollection(MethodView):
 
         return streams
 
-    @blp.arguments(StreamSchema)
+    @blp.arguments(StreamCreateSchema)
     @blp.response(201, StreamSchema)
     # @admin_required
     def post(self, stream_data):
@@ -65,7 +65,7 @@ class StreamItem(MethodView):
     # @jwt_required()
     def get(self, stream_name):
         """
-        Get a stream by ID.
+        Get a stream by name.
 
         :param stream_name: Stream Name
         :return: Stream data
@@ -119,7 +119,7 @@ class StreamItem(MethodView):
     # @admin_required
     def delete(self, stream_name):
         """
-        Delete a stream by ID.
+        Delete a stream by name.
 
         :param stream_name: Stream Name
         :return: None

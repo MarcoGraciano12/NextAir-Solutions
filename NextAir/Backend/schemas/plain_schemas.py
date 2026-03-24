@@ -72,6 +72,15 @@ class StreamSchema(PlainStreamSchema):
     blocks_count = fields.Int(dump_only=True)
 
 
+class StreamCreateSchema(Schema):
+    """
+    Schema for stream creation with station_name.
+    """
+    station_name = fields.Str(required=True)
+    stream_name = fields.Str(required=True)
+    external_id = fields.Int(required=True)
+
+
 class DaySchema(PlainDaySchema):
     """
     Day schema with nested blocks.

@@ -9,7 +9,7 @@ Description: Manages CRUD operations for radio stations with thread-safe access.
 
 from threading import Lock
 from .station import Station
-from models import StationModel, StreamModel
+from models import StationModel
 from logging import Logger, getLogger
 
 
@@ -198,7 +198,8 @@ class StreamingController:
         # Delegate with station_id
         return station.create_stream(station_model.station_id, **kwargs)
 
-    def retrieve_stream(self, stream_name: str):
+    @staticmethod
+    def retrieve_stream(stream_name: str):
         """
         Get a stream by name.
 
@@ -206,33 +207,32 @@ class StreamingController:
         :return: Tuple (StreamModel, message) - model is None on error
         """
         try:
-            stream_model = StreamModel.find_by_name(stream_name)
+            stream_model = Station.find_stream_by_name(stream_name)
 
             if not stream_model:
-                self.__logger.warning(f"Stream not found: {stream_name}")
                 return None, "Stream not found"
 
             return stream_model, None
 
         except Exception as error:
-            self.__logger.error(f"Error retrieving stream: {error}")
             return None, f"Failed to retrieve stream: {str(error)}"
 
-    def retrieve_all_streams(self):
+    @staticmethod
+    def retrieve_all_streams():
         """
         Get all streams from all stations.
 
         :return: Tuple (list of StreamModel, message) - list is None on error
         """
         try:
-            streams = StreamModel.get_all()
+            streams = Station.get_all_streams()
             return streams, None
 
         except Exception as error:
-            self.__logger.error(f"Error retrieving all streams: {error}")
             return None, f"Failed to retrieve streams: {str(error)}"
 
-    def retrieve_streams_for_station(self, station_name: str):
+    @staticmethod
+    def retrieve_streams_for_station(station_name: str):
         """
         Get all streams for a specific station.
 
@@ -244,15 +244,11 @@ class StreamingController:
             station_model = StationModel.find_by_name(station_name)
 
             if not station_model:
-                self.__logger.warning(f"Station not found: {station_name}")
                 return None, "Station not found"
 
-            # Query streams by station_id
-            streams = StreamModel.find_by_station_id(station_model.station_id)
-            return streams, None
+            return Station.get_streams_by_station_id(station_model.station_id), None
 
         except Exception as error:
-            self.__logger.error(f"Error retrieving streams for station: {error}")
             return None, f"Failed to retrieve streams: {str(error)}"
 
     def delete_stream(self, stream_name: str):
@@ -264,7 +260,7 @@ class StreamingController:
         """
         try:
             # Get stream from database
-            stream_model = StreamModel.find_by_name(stream_name)
+            stream_model = Station.find_stream_by_name(stream_name)
 
             if not stream_model:
                 self.__logger.warning(f"Stream not found in DB: {stream_name}")
@@ -283,19 +279,59 @@ class StreamingController:
 
             if not station:
                 self.__logger.warning(f"Station not in memory: {station_model.station_name}")
-                return None, "Station not found"
+                return Station.delete_stream_by_name(stream_name)
 
             # Delete stream from memory (stops and removes)
-            if not station.delete_stream(stream_name):
-                self.__logger.error(f"Failed to delete stream from memory: {stream_name}")
-                # return None, "Failed to delete stream"
-
-            # Delete from database
-            stream_model.delete_from_db()
-
-            self.__logger.info(f"Stream deleted: {stream_name}")
-            return stream_model, None
+            return station.delete_stream(stream_name)
 
         except Exception as error:
             self.__logger.error(f"Error deleting stream: {error}")
             return None, f"Failed to delete stream: {str(error)}"
+
+    # ==================================================================================================================
+    # SINGLE TRANSMISSION
+    # ==================================================================================================================
+
+    def start_transmission(self, station_name: str, stream_name: str):
+        pass
+
+    def stop_transmission(self, station_name: str, stream_name: str):
+        pass
+
+    def restart_transmission(self, station_name: str, stream_name: str):
+        pass
+
+    def reload_transmission(self, station_name: str, stream_name: str):
+        pass
+
+    # ==================================================================================================================
+    # STATION TRANSMISSIONS
+    # ==================================================================================================================
+
+    def start_station_transmissions(self, station_name: str):
+        pass
+
+    def stop_station_transmissions(self, station_name: str):
+        pass
+
+    def restart_station_transmissions(self, station_name: str):
+        pass
+
+    def reload_station_transmissions(self, station_name: str):
+        pass
+
+    # ==================================================================================================================
+    # ALL TRANSMISSIONS
+    # ==================================================================================================================
+
+    def start_all_transmissions(self):
+        pass
+
+    def stop_all_transmissions(self):
+        pass
+
+    def restart_all_transmissions(self):
+        pass
+
+    def reload_all_transmissions(self):
+        pass
