@@ -320,7 +320,7 @@ class StartAllTransmissions(MethodView):
     Start all station transmissions.
     """
 
-    @blp.response(200)
+    @blp.response(204)
     # @jwt_required()
     def post(self):
         """
@@ -328,9 +328,10 @@ class StartAllTransmissions(MethodView):
 
         :return: Operation status
         """
-        # TODO: Get all stations and start all streams
+        _, error = controller.start_all_transmissions()
 
-        return {"status": "all_started"}
+        if error:
+            abort(400, message=error)
 
 
 @blp.route("/streams/stop")
@@ -339,7 +340,7 @@ class StopAllTransmissions(MethodView):
     Stop all station transmissions.
     """
 
-    @blp.response(200)
+    @blp.response(204)
     # @jwt_required()
     def post(self):
         """
@@ -347,9 +348,10 @@ class StopAllTransmissions(MethodView):
 
         :return: Operation status
         """
-        # TODO: Get all stations and stop all streams
+        _, error = controller.stop_all_transmissions()
 
-        return {"status": "all_stopped"}
+        if error:
+            abort(400, message=error)
 
 
 @blp.route("/streams/restart")

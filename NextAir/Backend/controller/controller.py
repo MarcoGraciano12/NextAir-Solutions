@@ -227,10 +227,20 @@ class Controller:
     # ==================================================================================================================
 
     def start_all_transmissions(self, **kwargs):
-        pass
+        """
+        Start all transmissions in parallel
+
+        :return: tuple (success: bool, errors: dict/str or None)
+        """
+        return self.__transmission_controller.start_all_transmissions()
 
     def stop_all_transmissions(self, **kwargs):
-        pass
+        """
+        Stop all transmissions in parallel
+
+        :return: tuple (success: bool, errors: dict/str or None)
+        """
+        return self.__transmission_controller.stop_all_transmissions()
 
     def restart_all_transmissions(self, **kwargs):
         pass

@@ -11,6 +11,7 @@ from threading import Lock
 from .station import Station
 from models import StationModel
 from logging import Logger, getLogger
+from concurrent.futures import ThreadPoolExecutor
 
 
 class StreamingController:
@@ -390,7 +391,6 @@ class StreamingController:
 
         return station.start_all_streams(station_model.station_id)
 
-
     def stop_station_transmissions(self, station_name: str):
         """
         Stop all station transmissions
@@ -418,10 +418,51 @@ class StreamingController:
     # ==================================================================================================================
 
     def start_all_transmissions(self):
-        pass
+        """
+        Start all transmissions
+
+        :return: tuple (success: bool, errors: dict/str or None)
+        """
+        station_models = StationModel.get_all()
+
+        if not station_models:
+            return False, "No stations found in db"
+
+        errors = {}
+        for station in station_models:
+            _, error = self.start_station_transmissions(station.station_name)
+
+            if error:
+                errors[station.station_name] = error
+
+        if errors:
+            return False, errors
+
+        return True, None
 
     def stop_all_transmissions(self):
-        pass
+        """
+        Stop all transmissions
+
+        :return: tuple (success: bool, errors: dict/str or None)
+        """
+        with self.__lock:
+            stations = list(self.__stations.keys())
+
+        if not stations:
+            return False, "No stations found in memory"
+
+        errors = {}
+        for station_name in stations:
+            _, error = self.stop_station_transmissions(station_name)
+
+            if error:
+                errors[station_name] = error
+
+        if errors:
+            return False, errors
+
+        return True, None
 
     def restart_all_transmissions(self):
         pass
