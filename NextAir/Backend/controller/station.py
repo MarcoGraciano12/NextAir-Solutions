@@ -6,6 +6,7 @@ Date: March 20, 2026
 
 Description: Station object that manages multiple audio streams.
 """
+from pyexpat import ErrorString
 
 from models import StreamModel
 from threading import Lock
@@ -291,8 +292,17 @@ class Station:
             self.__logger.warning(f"No available streams for station {self.__station_name}")
             return False, "No available streams"
 
+        errors = {}
         for stream in streams:
-            self.start(stream.stream_name)
+            _, error = self.start(stream.stream_name)
+
+            if error:
+                # Save start stream error
+                errors[stream.stream_name] = error
+
+        if errors:
+            # Return start stream errors
+            return False, errors
 
         return True, None
 
@@ -305,8 +315,17 @@ class Station:
         with self.__lock:
             streams = list(self.__streams.keys())
 
+        errors = {}
         for stream_name in streams:
-            self.stop(stream_name)
+            _, error = self.stop(stream_name)
+
+            if error:
+                # Save stop stream error
+                errors[stream_name] = error
+
+        if errors:
+            # Return stop stream errors
+            return False, errors
 
         return True, None
 
