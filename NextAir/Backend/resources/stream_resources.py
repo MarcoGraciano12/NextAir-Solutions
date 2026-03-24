@@ -56,19 +56,19 @@ class StreamCollection(MethodView):
 
 
 @blp.route("/streams/<string:stream_name>")
-class StreamItem(MethodView):
+class StreamItemGet(MethodView):
     """
-    Resource for individual stream operations.
+    Resource for getting a stream.
     """
 
     @blp.response(200, StreamSchema)
     # @jwt_required()
-    def get(self, stream_name):
+    def get(self, stream_name: str):
         """
         Get a stream by name.
 
-        :param stream_name: Stream Name
-        :return: Stream data
+        :param stream_name: name of the stream
+        :return: stream data
         """
         stream, error = controller.get_stream(stream_name=stream_name)
 
@@ -76,6 +76,28 @@ class StreamItem(MethodView):
             abort(404, message=error)
 
         return stream
+
+
+@blp.route("/streams/<string:station_name>/<string:stream_name>")
+class StreamItemDelete(MethodView):
+    """
+    Resource for deleting a stream.
+    """
+
+    @blp.response(204)
+    # @admin_required
+    def delete(self, station_name: str, stream_name: str):
+        """
+        Delete a stream by name.
+
+        :param station_name: name of the station
+        :param stream_name: name of the stream
+        :return: None
+        """
+        stream, error = controller.delete_stream(station_name=station_name, stream_name=stream_name)
+
+        if error:
+            abort(404, message=error)
 
     # @blp.arguments(StreamUpdateSchema)
     # @blp.response(200, StreamSchema)
@@ -114,20 +136,6 @@ class StreamItem(MethodView):
     #
     #     stream.save_to_db()
     #     return stream
-
-    @blp.response(204)
-    # @admin_required
-    def delete(self, stream_name):
-        """
-        Delete a stream by name.
-
-        :param stream_name: Stream Name
-        :return: None
-        """
-        stream, error = controller.delete_stream(stream_name=stream_name)
-
-        if error:
-            abort(404, message=error)
 
 
 # ==================================================================================================================

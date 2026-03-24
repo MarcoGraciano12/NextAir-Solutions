@@ -11,7 +11,6 @@ from threading import Lock
 from .station import Station
 from models import StationModel
 from logging import Logger, getLogger
-from concurrent.futures import ThreadPoolExecutor
 
 
 class StreamingController:
@@ -76,18 +75,9 @@ class StreamingController:
                 self.__logger.warning(f"Station name already exists: {station_name}")
                 return None, "A station with that name already exists"
 
-            with self.__lock:
-                # Check if station already exists in memory
-                if station_name in self.__stations:
-                    self.__logger.warning(f"Station already in memory: {station_name}")
-                    return None, "Station already exists"
-
-                # Save to database
-                station_model = StationModel(station_name=station_name, files_path=files_path)
-                station_model.save_to_db()
-
-                # Create station object
-                self.__stations[station_name] = Station(station_name, files_path, self.__stream_input_controller)
+            # Save to database
+            station_model = StationModel(station_name=station_name, files_path=files_path)
+            station_model.save_to_db()
 
             self.__logger.info(f"Station created: {station_name}")
             return station_model, None
@@ -96,39 +86,30 @@ class StreamingController:
             self.__logger.error(f"Error creating station: {error}")
             return None, f"Failed to create station: {str(error)}"
 
-    def retrieve_station(self, station_name: str):
+    @staticmethod
+    def retrieve_station(station_name: str):
         """
         Get a station from database by name.
 
         :param station_name: Station name
         :return: Tuple (StationModel, message) - model is None on error
         """
-        try:
-            station_model = StationModel.find_by_name(station_name)
+        station_model = StationModel.find_by_name(station_name)
 
-            if not station_model:
-                self.__logger.warning(f"Station not found with name: {station_name}")
-                return None, "Station not found"
+        if not station_model:
+            return None, "Station not found"
 
-            return station_model, None
+        return station_model, None
 
-        except Exception as error:
-            self.__logger.error(f"Error retrieving station: {error}")
-            return None, f"Failed to retrieve station: {str(error)}"
-
-    def retrieve_all_stations(self):
+    @staticmethod
+    def retrieve_all_stations():
         """
         Get all stations from database.
 
-        :return: Tuple (list of StationModel, message) - list is None on error
+        :return: Tuple (list of StationModel, message)
         """
-        try:
-            stations = StationModel.get_all()
-            return stations, None
-
-        except Exception as error:
-            self.__logger.error(f"Error retrieving stations: {error}")
-            return None, f"Failed to retrieve stations: {str(error)}"
+        stations = StationModel.get_all()
+        return stations, None
 
     def delete_station(self, station_name: str):
         """
@@ -138,6 +119,17 @@ class StreamingController:
         :return: Tuple (StationModel, message) - model is None on error
         """
         try:
+            # Get station object from memory
+            with self.__lock:
+                station = self.__stations.get(station_name)
+
+            if station:
+                station.stop_all_streams()
+
+                # Remove from memory after successful stop
+                with self.__lock:
+                    self.__stations.pop(station_name, None)
+
             # Get station from database
             station_model = StationModel.find_by_name(station_name)
 
@@ -145,21 +137,6 @@ class StreamingController:
                 self.__logger.warning(f"Station not found with name: {station_name}")
                 return None, "Station not found"
 
-            # Get station object from memory
-            with self.__lock:
-                station = self.__stations.get(station_name)
-
-            # Stop all streams if exists in memory
-            if station:
-                if not station.stop_all_streams():
-                    self.__logger.error(f"Failed to stop streams for station: {station_name}")
-                    # return None, "Failed to stop station streams"
-
-                # Remove from memory after successful stop
-                with self.__lock:
-                    self.__stations.pop(station_name, None)
-
-            # Delete from database
             station_model.delete_from_db()
 
             self.__logger.info(f"Station deleted: {station_name}")
@@ -181,23 +158,19 @@ class StreamingController:
         :param kwargs: Stream configuration parameters
         :return: Tuple (StreamModel, message) - model is None on error
         """
-        # Get station model from DB to get station_id
-        station_model = StationModel.find_by_name(station_name)
+        try:
+            # Get station model from DB to get station_id
+            station_model = StationModel.find_by_name(station_name)
 
-        if not station_model:
-            self.__logger.warning(f"Station not found in DB: {station_name}")
-            return None, "Station not found"
+            if not station_model:
+                self.__logger.warning(f"Station not found in DB: {station_name}")
+                return None, "Station not found"
 
-        # Get station from memory
-        with self.__lock:
-            station = self.__stations.get(station_name)
+            # Delegate with station_id
+            return Station.create_stream(station_model.station_id, **kwargs)
 
-        if not station:
-            self.__logger.warning(f"Station not in memory: {station_name}")
-            return None, "Station not found"
-
-        # Delegate with station_id
-        return station.create_stream(station_model.station_id, **kwargs)
+        except Exception as error:
+            return None, f"Failed to create stream: {str(error)}"
 
     @staticmethod
     def retrieve_stream(stream_name: str):
@@ -252,38 +225,29 @@ class StreamingController:
         except Exception as error:
             return None, f"Failed to retrieve streams: {str(error)}"
 
-    def delete_stream(self, stream_name: str):
+    def delete_stream(self, station_name: str, stream_name: str):
         """
         Delete a stream by name.
 
+        :param station_name: Station name
         :param stream_name: Stream name
         :return: Tuple (StreamModel, message) - model is None on error
         """
         try:
-            # Get stream from database
-            stream_model = Station.find_stream_by_name(stream_name)
+            with self.__lock:
+                station = self.__stations.get(station_name, None)
 
-            if not stream_model:
-                self.__logger.warning(f"Stream not found in DB: {stream_name}")
-                return None, "Stream not found"
+            if station:
+                station.remove(stream_name)
 
             # Get station from database
-            station_model = StationModel.find_by_id(stream_model.station_id)
+            station_model = StationModel.find_by_name(station_name)
 
             if not station_model:
                 self.__logger.warning(f"Station not found in DB for stream: {stream_name}")
                 return None, "Station not found"
 
-            # Get station from memory
-            with self.__lock:
-                station = self.__stations.get(station_model.station_name)
-
-            if not station:
-                self.__logger.warning(f"Station not in memory: {station_model.station_name}")
-                return Station.delete_stream_by_name(stream_name)
-
-            # Delete stream from memory (stops and removes)
-            return station.delete_stream(stream_name)
+            return Station.delete_stream(stream_name)
 
         except Exception as error:
             self.__logger.error(f"Error deleting stream: {error}")

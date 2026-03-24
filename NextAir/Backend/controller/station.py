@@ -6,7 +6,6 @@ Date: March 20, 2026
 
 Description: Station object that manages multiple audio streams.
 """
-from pyexpat import ErrorString
 
 from models import StreamModel
 from threading import Lock
@@ -105,7 +104,8 @@ class Station:
         except Exception as error:
             self.__logger.error(f"Failed to initialize streams: {error}")
 
-    def create_stream(self, station_id: int, **kwargs):
+    @staticmethod
+    def create_stream(station_id: int, **kwargs):
         """
         Create a new stream for this station.
 
@@ -113,66 +113,22 @@ class Station:
         :param kwargs: Stream configuration parameters
         :return: Tuple (StreamModel, message) - model is None on error
         """
-        try:
-            stream_name = kwargs.get("stream_name")
-            external_id = kwargs.get("external_id")
+        stream_name = kwargs.get("stream_name")
+        external_id = kwargs.get("external_id")
 
-            # Validate name uniqueness
-            if StreamModel.find_by_name(stream_name):
-                self.__logger.warning(f"Stream name already exists: {stream_name}")
-                return None, "A stream with that name already exists"
+        # Validate name uniqueness
+        if StreamModel.find_by_name(stream_name):
+            return None, "A stream with that name already exists"
 
-            # Validate external_id uniqueness
-            if StreamModel.find_by_external_id(external_id):
-                self.__logger.warning(f"Stream external_id already exists: {external_id}")
-                return None, "A stream with that external ID already exists"
+        # Validate external_id uniqueness
+        if StreamModel.find_by_external_id(external_id):
+            return None, "A stream with that external ID already exists"
 
-            with self.__lock:
-                # Check if stream already exists in memory
-                if stream_name in self.__streams:
-                    self.__logger.warning(f"Stream already in memory: {stream_name}")
-                    return None, "Stream already exists"
+        # Save to database
+        stream_model = StreamModel(station_id=station_id, stream_name=stream_name, external_id=external_id)
+        stream_model.save_to_db()
 
-                # Save to database
-                stream_model = StreamModel(station_id=station_id, stream_name=stream_name, external_id=external_id)
-                stream_model.save_to_db()
-
-                # Create stream object
-                self.__streams[stream_name] = Stream(stream_name, external_id)
-
-            self.__logger.info(f"Stream created: {stream_name}")
-            return stream_model, None
-
-        except Exception as error:
-            self.__logger.error(f"Error creating stream: {error}")
-            return None, f"Failed to create stream: {str(error)}"
-
-    def delete_stream(self, stream_name: str):
-        """
-        Stop and remove stream from memory.
-
-        :param stream_name: Stream name
-        :return: True if deleted successfully, False otherwise
-        """
-        # Get stream from memory
-        with self.__lock:
-            stream = self.__streams.get(stream_name)
-
-        if not stream:
-            self.__logger.info(f"Stream not in memory: {stream_name}")
-            return None, "Stream not found"
-
-        # Stop stream operations
-        if not stream.stop():
-            self.__logger.error(f"Failed to stop stream: {stream_name}")
-            return None, "Failed to stop stream"
-
-        # Remove from memory after successful stop
-        with self.__lock:
-            self.__streams.pop(stream_name, None)
-
-        self.__logger.info(f"Stream deleted from memory: {stream_name}")
-        return self.delete_stream_by_name(stream_name)
+        return stream_model, None
 
     @staticmethod
     def find_stream_by_name(stream_name: str):
@@ -204,7 +160,7 @@ class Station:
         return StreamModel.find_by_station_id(station_id)
 
     @staticmethod
-    def delete_stream_by_name(stream_name: str):
+    def delete_stream(stream_name: str):
         """
         Delete a stream by name.
 
@@ -218,6 +174,25 @@ class Station:
 
         stream_model.delete_from_db()
         return stream_model, None
+
+    def remove_stream(self, stream_name: str):
+        """
+        Remove stream from the station
+
+        :param stream_name: Name of the stream to remove
+        :return: tuple (success: bool, error: str or None)
+        """
+        _, error = self.stop(stream_name)
+
+        if error:
+            self.__logger.warning(f"Failed to stop stream {stream_name}: {error}")
+            return False, f"Failed to remove stream: {error}"
+
+        with self.__lock:
+            self.__streams.pop(stream_name, None)
+
+        self.__logger.info(f"Stream {stream_name} removed successfully")
+        return True, None
 
     # ==================================================================================================================
     # SINGLE TRANSMISSION
