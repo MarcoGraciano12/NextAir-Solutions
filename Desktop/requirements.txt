@@ -1,0 +1,13 @@
+pyside6
+qt-material
+python-dotenv
+
+passlib # Password hashing
+
+# Database connectivity
+pyodbc
+python-dotenv
+
+
+sqlalchemy
+psycopg2-binary
