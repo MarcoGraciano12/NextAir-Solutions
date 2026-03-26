@@ -50,6 +50,27 @@ class User(Base):
         """
         return session.query(cls).filter_by(id=user_id).first()
 
+    @classmethod
+    def get_all(cls, session):
+        """
+        Get all users from database.
+
+        :param session: Database session
+        :return: List of User instances
+        """
+        return session.query(cls).all()
+
+    @classmethod
+    def find_by_role(cls, session, role: str):
+        """
+        Find users by role.
+
+        :param session: Database session
+        :param role: Role to filter
+        :return: List of User instances with specified role
+        """
+        return session.query(cls).filter_by(role=role).all()
+
     def save_to_db(self, session) -> bool:
         """
         Save the current user instance to the database.
