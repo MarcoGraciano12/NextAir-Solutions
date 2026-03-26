@@ -186,9 +186,11 @@ class TransmissionController:
 
     def start_transmission(self, stream_name: str, **kwargs):
         """
-        Start a station's transmission
+        Start a stream transmission.
 
-        :return: tuple
+        :param stream_name: Stream identifier
+        :param kwargs: Transmission parameters
+        :return: Tuple (success: bool, result or error message)
         """
         with self.__lock:
             transmission = self.__transmissions.get(stream_name, None)
@@ -206,5 +208,22 @@ class TransmissionController:
                 self.__logger.info(f"{stream_name} already in transmissions (added by another thread)")
 
         return transmission.start()
+
+    def stop_transmission(self, stream_name: str):
+        """
+        Stop a stream transmission.
+
+        :param stream_name: Stream identifier
+        :return: Tuple (success: bool, result or error message)
+        """
+        with self.__lock:
+            transmission = self.__transmissions.get(stream_name, None)
+
+        if not transmission:
+            self.__logger.warning(f"Can't stop {stream_name}, transmission not found in current transmissions")
+            return False, f"{stream_name} not found in transmissions"
+
+        return transmission.stop()
+
 
 
