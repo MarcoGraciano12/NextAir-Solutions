@@ -1,8 +1,9 @@
 """
 StreamInput ORM model.
 
-Author: Marco
+Author: Marco Graciano
 Date: 2025-03-26
+
 Represents an audio input source configuration.
 """
 
@@ -32,3 +33,18 @@ class StreamInput(Base):
     channel = Column(Integer, nullable=False)
     sample_rate = Column(Integer, nullable=False)
     block_size = Column(Integer, nullable=False)
+
+    def to_dict(self):
+        """
+        Convert StreamInput to dictionary.
+
+        :return: Dictionary with stream input configuration
+        """
+        return {
+            "stream_input_id": self.stream_input_id,
+            "name": self.name,
+            "url": self.url,
+            "channel": self.channel,
+            "sample_rate": self.sample_rate,
+            "block_size": self.block_size
+        }

@@ -47,3 +47,16 @@ class Stream(Base):
         uselist=False,  # One-to-one relationship
         lazy=False  # Always eager load
     )
+
+    def to_dict(self):
+        """
+        Convert Stream to dictionary.
+
+        :return: Dictionary with stream attributes only
+        """
+        return {
+            "stream_id": self.stream_id,
+            "station_id": self.station_id,
+            "stream_name": self.stream_name,
+            "external_id": self.external_id
+        }

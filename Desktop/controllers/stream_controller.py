@@ -180,27 +180,25 @@ class StreamController:
             self.__logger.error(f"Error updating stream: {e}")
             return False, "Error updating stream"
 
-    def delete(self, stream_id: int):
+    def delete(self, stream_name: str):
         """
-        Delete stream by ID.
+        Delete stream by name.
 
-        :param stream_id: Stream primary key
+        :param stream_name: Stream name to delete
         :return: Tuple (success: bool, result: success message or error message)
         """
         try:
             with Session(engine) as session:
-                # Check if stream exists
-                stream = session.query(Stream).filter_by(stream_id=stream_id).first()
+                stream = session.query(Stream).filter_by(stream_name=stream_name).first()
 
                 if not stream:
-                    return False, f"Stream not found: {stream_id}"
+                    return False, f"Stream not found: {stream_name}"
 
-                stream_name = stream.stream_name
                 session.delete(stream)
                 session.commit()
 
                 return True, f"Stream deleted: {stream_name}"
 
         except Exception as e:
-            self.__logger.error(f"Error deleting stream: {e}")
+            self.__logger.error(f"Error deleting stream {stream_name}: {e}")
             return False, "Error deleting stream"

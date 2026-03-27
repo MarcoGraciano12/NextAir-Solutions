@@ -51,3 +51,22 @@ class Broadcast(Base):
 
     # One-to-one relationship with Stream
     stream: Mapped["Stream"] = relationship(back_populates="broadcast")
+
+    def to_dict(self):
+        """
+        Convert Broadcast to dictionary.
+
+        :return: Dictionary with broadcast configuration including credentials
+        """
+        return {
+            "broadcast_id": self.broadcast_id,
+            "stream_id": self.stream_id,
+            "name": self.name,
+            "url": self.url,
+            "user": self.user,
+            "password": self.password,
+            "channels": self.channels,
+            "sample_rate": self.sample_rate,
+            "block_size": self.block_size,
+            "bitrate": self.bitrate
+        }

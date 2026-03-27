@@ -224,6 +224,3 @@ class TransmissionController:
             return False, f"{stream_name} not found in transmissions"
 
         return transmission.stop()
-
-
-

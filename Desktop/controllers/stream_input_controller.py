@@ -176,7 +176,7 @@ class StreamInputController:
                 session.delete(stream_input)
                 session.commit()
 
-                return True, f"StreamInput deleted: {input_name}"
+                return True, stream_input
 
         except Exception as e:
             self.__logger.error(f"Error deleting stream input: {e}")

@@ -35,3 +35,15 @@ class Station(Base):
 
     # One-to-many relationship: one station has multiple streams
     streams: Mapped[List["Stream"]] = relationship(back_populates="station", lazy=True, cascade="all, delete-orphan")
+
+    def to_dict(self):
+        """
+        Convert Station to dictionary.
+
+        :return: Dictionary with station attributes
+        """
+        return {
+            "station_id": self.station_id,
+            "station_name": self.station_name,
+            "files_path": self.files_path
+        }
