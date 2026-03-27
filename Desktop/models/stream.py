@@ -7,9 +7,9 @@ Date: 2025-03-26
 Represents an audio stream belonging to a station.
 """
 
-from Desktop.db import Base
-from typing import TYPE_CHECKING, Optional
+from db import Base
 from sqlalchemy.orm import relationship, Mapped
+from typing import TYPE_CHECKING, Optional, List
 from sqlalchemy import Column, Integer, String, ForeignKey
 
 
@@ -17,6 +17,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 if TYPE_CHECKING:
     from .station import Station
     from .broadcast import Broadcast
+    from .playlist import Playlist
+    from .sources import Sources
 
 
 class Stream(Base):
@@ -46,6 +48,20 @@ class Stream(Base):
         cascade="all, delete-orphan",
         uselist=False,  # One-to-one relationship
         lazy=False  # Always eager load
+    )
+
+    # One-to-many relationship: one stream has multiple playlist entries
+    # CASCADE: deleting stream deletes all its playlist entries
+    playlists: Mapped[List["Playlist"]] = relationship(
+        back_populates="stream",
+        cascade="all, delete-orphan"
+    )
+
+    # One-to-many relationship: one stream has multiple source configurations
+    # CASCADE: deleting stream deletes all its source configurations
+    sources: Mapped[List["Sources"]] = relationship(
+        back_populates="stream",
+        cascade="all, delete-orphan"
     )
 
     def to_dict(self):

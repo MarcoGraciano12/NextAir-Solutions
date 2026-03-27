@@ -7,10 +7,10 @@ Date: 2025-03-26
 Handles database operations for StreamInput model.
 """
 
-from Desktop.db import engine
+from db import engine
 from sqlalchemy.orm import Session
 from logging import Logger, getLogger
-from Desktop.models import StreamInput
+from models import StreamInput
 
 
 class StreamInputController:

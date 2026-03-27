@@ -6,10 +6,10 @@ Date: 2025-03-26
 Handles database operations for Stream model.
 """
 
-from Desktop.db import engine
+from db import engine
 from sqlalchemy.orm import Session
 from logging import Logger, getLogger
-from Desktop.models import Stream, Station
+from models import Stream, Station
 
 
 class StreamController:

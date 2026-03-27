@@ -8,7 +8,7 @@ class Manager:
     def __init__(self, logger: Logger = None):
 
         if not init_db():
-            raise "Failed to initialize database connection"
+            raise RuntimeError("Failed to initialize database connection")
 
         self.__logger = logger or getLogger(self.__class__.__name__)
 
@@ -19,6 +19,9 @@ class Manager:
         self.__streams = StreamController()
         self.__broadcast = BroadcastController()
         self.__transmission = TransmissionController()
+
+        self.__sources = SourcesController()
+        self.__playlist = PlaylistController()
 
     def init_subjects(self):
         success, items = self.__stream_inputs.get_all()
@@ -221,7 +224,20 @@ class Manager:
     # ALL TRANSMISSIONS
     # ==================================================================================================================
 
+    # ==================================================================================================================
+    # PLAYLIST
+    # ==================================================================================================================
 
+    # ==================================================================================================================
+    # SOURCES
+    # ==================================================================================================================
+    def get_stream_sources(self, stream_name: str, weekday: int):
+        success, stream = self.__streams.get_by_name(stream_name)
+
+        if not success:
+            return False, stream
+
+        return self.__sources.get_by_stream_and_weekday(stream_id=stream.stream_id, weekday=weekday)
 
 
 

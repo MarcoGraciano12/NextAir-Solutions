@@ -7,7 +7,7 @@ Date: 2025-03-26
 Represents an audio input source configuration.
 """
 
-from Desktop.db import Base
+from db import Base
 from sqlalchemy import Column, Integer, String
 
 

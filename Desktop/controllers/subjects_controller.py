@@ -1,9 +1,9 @@
 
 from threading import Lock
 from logging import Logger, getLogger
-from Desktop.scripts.decoders import Decoder
-from Desktop.scripts.inputs import StreamInput
-from Desktop.scripts.subjects import StreamSubject
+from scripts.decoders import Decoder
+from scripts.inputs import StreamInput
+from scripts.subjects import StreamSubject
 
 
 class SubjectsController:

@@ -7,6 +7,7 @@ Date: 2025-03-26
 Initializes the SQLAlchemy engine and declarative base for ORM models.
 """
 
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from os import getenv
@@ -36,6 +37,7 @@ engine = create_engine(
 # Base class for all ORM models
 Base = declarative_base()
 
+
 def init_db():
     """
     Initialize database tables.
@@ -46,9 +48,9 @@ def init_db():
     :return: True if successful, False otherwise
     """
     try:
-        # Create all tables
-        Base.metadata.create_all(engine)
+        Base.metadata.create_all(bind=engine)
         return True
+
     except Exception as e:
         print(f"Error initializing database: {e}")
         return False

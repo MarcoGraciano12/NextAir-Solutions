@@ -6,7 +6,7 @@ Date: 2025-03-26
 Represents broadcast configuration for a stream.
 """
 
-from Desktop.db import Base
+from db import Base
 from typing import TYPE_CHECKING
 from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy import Column, Integer, String, ForeignKey

@@ -6,7 +6,7 @@ Date: 2025-03-26
 Represents a radio station with associated streams.
 """
 
-from Desktop.db import Base
+from db import Base
 from typing import TYPE_CHECKING, List
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship, Mapped

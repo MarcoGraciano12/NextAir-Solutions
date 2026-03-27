@@ -9,7 +9,7 @@ Description: Stream object managing encoding, broadcasting and observer pattern.
 
 from logging import Logger, getLogger
 from threading import Thread, Lock, Event
-
+from scripts import get_station_sources, get_station_playlist
 
 class Transmission:
     """
@@ -110,7 +110,10 @@ class Transmission:
 
             while not self.__stop_stream.is_set():
                 self.__logger.debug("Streaming audio chunk")
-
+                consult = get_station_sources(self.__external_id)
+                if consult:
+                    for row in consult:
+                        print(row)
                 # Wait 5 seconds or until stop signal
                 self.__stop_stream.wait(5)
 

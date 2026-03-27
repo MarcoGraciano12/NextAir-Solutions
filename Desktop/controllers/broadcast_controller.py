@@ -7,10 +7,10 @@ Date: 2025-03-26
 Handles database operations for Broadcast model.
 """
 
-from Desktop.db import engine
+from db import engine
 from sqlalchemy.orm import Session
 from logging import Logger, getLogger
-from Desktop.models import Broadcast, Stream
+from models import Broadcast, Stream
 
 
 class BroadcastController:

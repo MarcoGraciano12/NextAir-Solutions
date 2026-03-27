@@ -50,7 +50,7 @@ def get_station_sources(external_id: int, date: datetime = None) -> List[Tuple] 
         date = date or datetime.now()
 
         query = text("""
-            SELECT *
+            SELECT DISTINCT DayOfWeek, StartTime, EndTime, SourceCode
             FROM dbo.fn_GetStationSources(:date, :external_id)
             ORDER BY DayOfWeek, StartTime
         """)
@@ -76,10 +76,9 @@ def get_station_playlist(external_id: int, date: datetime = None) -> List[Tuple]
         date = date or datetime.now()
 
         query = text("""
-            SELECT *
-            FROM dbo.fn_GetStationPlaylist(:date, :external_id)
-            WHERE ItemType <> 'PRG'
-            ORDER BY StartTime, SequenceInCut
+           SELECT DISTINCT ItemType, StartTime, EndTime, ItemCode, Source, SpotId, SequenceInCut
+           FROM dbo.fn_GetStationPlaylist(:date, :external_id)
+           ORDER BY StartTime, SequenceInCut
         """)
 
         with __engine.connect() as conn:
@@ -92,8 +91,8 @@ def get_station_playlist(external_id: int, date: datetime = None) -> List[Tuple]
 
 
 if __name__ == "__main__":
-    result = get_station_playlist(10, datetime(2026, 3, 28))
+    # now = datetime(2026, 3, 27, 0, 26, 55)
+    data = get_station_playlist(20)
 
-    if result:
-        for item in result:
-            print(item)
+    for item in data:
+        print(item)

@@ -6,8 +6,8 @@ Date: 2025-03-26
 Handles database operations for Station model.
 """
 
-from Desktop.db import engine
-from Desktop.models import Station
+from db import engine
+from models import Station
 from sqlalchemy.orm import Session
 from logging import Logger, getLogger
 
