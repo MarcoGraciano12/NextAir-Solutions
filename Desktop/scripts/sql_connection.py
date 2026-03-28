@@ -8,10 +8,8 @@ Date: 2025-03-26
 import os
 from datetime import datetime
 from logging import getLogger
-from typing import List, Tuple
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
-
 
 # Load environment variables
 load_dotenv()
@@ -38,7 +36,7 @@ __engine = create_engine(
 __logger.info("SQL Server connection pool initialized")
 
 
-def get_station_sources(external_id: int, date: datetime = None) -> List[Tuple] | None:
+def get_sources(external_id: int, date: datetime = None):
     """
     Get station sources from SQL Server function.
 
@@ -50,9 +48,9 @@ def get_station_sources(external_id: int, date: datetime = None) -> List[Tuple] 
         date = date or datetime.now()
 
         query = text("""
-            SELECT DISTINCT DayOfWeek, StartTime, EndTime, SourceCode
+            SELECT DISTINCT StartTime, EndTime, SourceCode
             FROM dbo.fn_GetStationSources(:date, :external_id)
-            ORDER BY DayOfWeek, StartTime
+            ORDER BY StartTime
         """)
 
         with __engine.connect() as conn:
@@ -64,7 +62,7 @@ def get_station_sources(external_id: int, date: datetime = None) -> List[Tuple] 
         return None
 
 
-def get_station_playlist(external_id: int, date: datetime = None) -> List[Tuple] | None:
+def get_playlist(external_id: int, date: datetime = None):
     """
     Get station playlist from SQL Server function.
 
@@ -90,7 +88,7 @@ def get_station_playlist(external_id: int, date: datetime = None) -> List[Tuple]
         return None
 
 
-def get_station_playlist_block(external_id: int, date: datetime = None, hour: int = None) -> List[Tuple] | None:
+def get_playlist_block(external_id: int, date: datetime = None, hour: int = None):
     """
     Get station playlist filtered by specific hour.
 
@@ -104,23 +102,25 @@ def get_station_playlist_block(external_id: int, date: datetime = None, hour: in
         hour = hour if hour is not None else datetime.now().hour
 
         hour_start = f"{hour:02d}:00:00"
-        hour_end = f"{(hour + 1) % 24:02d}:00:00"
 
-        query = text("""
+        # Build WHERE clause conditionally
+        if hour < 23:
+            hour_end = f"{hour + 1:02d}:00:00"
+            where_clause = "WHERE StartTime >= CAST(:hour_start AS TIME) AND StartTime < CAST(:hour_end AS TIME)"
+            params = {"date": date, "external_id": external_id, "hour_start": hour_start, "hour_end": hour_end}
+        else:
+            where_clause = "WHERE StartTime >= CAST(:hour_start AS TIME)"
+            params = {"date": date, "external_id": external_id, "hour_start": hour_start}
+
+        query = text(f"""
            SELECT DISTINCT ItemType, StartTime, EndTime, ItemCode, Source, SpotId, SequenceInCut
            FROM dbo.fn_GetStationPlaylist(:date, :external_id)
-           WHERE StartTime >= CAST(:hour_start AS TIME) 
-             AND StartTime < CAST(:hour_end AS TIME)
+           {where_clause}
            ORDER BY StartTime, SequenceInCut
         """)
 
         with __engine.connect() as conn:
-            result = conn.execute(query, {
-                "date": date,
-                "external_id": external_id,
-                "hour_start": hour_start,
-                "hour_end": hour_end
-            })
+            result = conn.execute(query, params)
             return result.fetchall()
 
     except Exception as e:

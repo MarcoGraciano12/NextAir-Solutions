@@ -7,9 +7,11 @@ Date: March 20, 2026
 Description: Stream object managing encoding, broadcasting and observer pattern.
 """
 
+from datetime import datetime
 from logging import Logger, getLogger
 from threading import Thread, Lock, Event
-from scripts import get_station_sources, get_station_playlist
+from scripts import get_weekday_sources, update_sources, update_schedule_block, get_schedule_block
+
 
 class Transmission:
     """
@@ -90,6 +92,47 @@ class Transmission:
     # TRANSMISSION
     # ==================================================================================================================
 
+    def __commercial_transition(self):
+        pass
+
+    def __manual_transition(self):
+        pass
+
+    def __automatic_transition(self):
+        pass
+
+    def __init_transmission(self, date: datetime):
+        """
+        Initialize transmission by loading or updating sources and playlist.
+
+        :param date: Datetime to initialize
+        :return: Tuple of (sources, playlist) or None if failed
+        """
+        # Try to get sources from database
+        sources = get_weekday_sources(self.__stream_id, date.weekday())
+
+        if not sources:
+            # Sources not found, fetch and update from external source
+            sources = update_sources(self.__external_id, self.__stream_id, date.weekday(), date)
+
+            if not sources:
+                # Failed to update sources
+                return None
+
+        # Try to get playlist block from database
+        playlist = get_schedule_block(self.__stream_id, date, date.hour)
+
+        if not playlist:
+            # Playlist not found, fetch and update from external source
+            playlist = update_schedule_block(self.__external_id, self.__stream_id, date, date.hour)
+
+            if not playlist:
+                # Failed to update playlist
+                return None
+
+        # Return both sources and playlist
+        return sources, playlist
+
     @property
     def is_running(self):
         """
@@ -106,16 +149,28 @@ class Transmission:
         :return: True if completed successfully, False on error
         """
         try:
-            self.__logger.info("Stream loop started")
+            now = datetime.now()
+
+            # Initialize transmission data
+            result = self.__init_transmission(now)
+
+            if not result:
+                # Failed to initialize transmission
+                self.__logger.error("Failed to initialize transmission")
+                self.__stop_stream.set()
+                return  # O lo que corresponda
+
+            # Unpack sources and playlist
+            sources, playlist = result
 
             while not self.__stop_stream.is_set():
-                self.__logger.debug("Streaming audio chunk")
-                consult = get_station_sources(self.__external_id)
-                if consult:
-                    for row in consult:
-                        print(row)
-                # Wait 5 seconds or until stop signal
-                self.__stop_stream.wait(5)
+                for source in sources:
+                    print(source.to_dict())
+
+                for item in playlist:
+                    print(item.to_dict())
+
+                self.__stop_stream.wait(10)
 
         except Exception as e:
             self.__logger.error(f"Stream loop error: {e}")
