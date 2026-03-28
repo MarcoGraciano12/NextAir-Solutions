@@ -90,9 +90,39 @@ def get_station_playlist(external_id: int, date: datetime = None) -> List[Tuple]
         return None
 
 
-if __name__ == "__main__":
-    # now = datetime(2026, 3, 27, 0, 26, 55)
-    data = get_station_playlist(20)
+def get_station_playlist_block(external_id: int, date: datetime = None, hour: int = None) -> List[Tuple] | None:
+    """
+    Get station playlist filtered by specific hour.
 
-    for item in data:
-        print(item)
+    :param external_id: Station external ID
+    :param date: Date to query
+    :param hour: Hour to filter (0-23)
+    :return: List of tuples with playlist data, None on error
+    """
+    try:
+        date = date or datetime.now()
+        hour = hour if hour is not None else datetime.now().hour
+
+        hour_start = f"{hour:02d}:00:00"
+        hour_end = f"{(hour + 1) % 24:02d}:00:00"
+
+        query = text("""
+           SELECT DISTINCT ItemType, StartTime, EndTime, ItemCode, Source, SpotId, SequenceInCut
+           FROM dbo.fn_GetStationPlaylist(:date, :external_id)
+           WHERE StartTime >= CAST(:hour_start AS TIME) 
+             AND StartTime < CAST(:hour_end AS TIME)
+           ORDER BY StartTime, SequenceInCut
+        """)
+
+        with __engine.connect() as conn:
+            result = conn.execute(query, {
+                "date": date,
+                "external_id": external_id,
+                "hour_start": hour_start,
+                "hour_end": hour_end
+            })
+            return result.fetchall()
+
+    except Exception as e:
+        __logger.error(f"Error fetching station playlist block: {e}")
+        return None
