@@ -92,11 +92,11 @@ class StreamController:
         try:
             with Session(engine) as session:
                 streams = session.query(Stream).all()
-                return True, streams
+                return streams
 
         except Exception as e:
             self.__logger.error(f"Error retrieving streams: {e}")
-            return False, "Error retrieving streams"
+            return None
 
     def get_by_station(self, station_id: int):
         """

@@ -101,6 +101,9 @@ class Transmission:
     def __automatic_transition(self):
         pass
 
+    def __transition_core(self):
+        pass
+
     def __init_transmission(self, date: datetime):
         """
         Initialize transmission by loading or updating sources and playlist.
