@@ -6,6 +6,8 @@ Date: 2025-03-25
 """
 
 import sys
+from msilib import RadioButtonGroup
+
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QFormLayout, QWidget, QLineEdit, QPushButton, QLabel, QTableWidget, QTableWidgetItem,
     QHBoxLayout, QMessageBox, QComboBox, QDialog, QDialogButtonBox, QHeaderView
@@ -18,7 +20,7 @@ from logging import Logger, getLogger
 from passlib.hash import pbkdf2_sha256
 from manager import Manager
 import logging
-from dialogs import AddStationDialog
+from dialogs import AddStationDialog, AddStreamDialog
 
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -68,6 +70,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ==============================================================================================================
         # STREAMS ACTIONS
         # ==============================================================================================================
+        # Connect add stream button
+        self.add_stream_button.pressed.connect(self.add_stream)
+
 
     def login(self):
         self.stackedWidget.setCurrentIndex(1)
@@ -105,6 +110,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         return reply == QMessageBox.Yes
 
+    @staticmethod
+    def __set_centered_item(table, row: int, col: int, text: str):
+        """
+        Create and set a centered table item.
+
+        :param table: QTableWidget to update
+        :param row: Row index
+        :param col: Column index
+        :param text: Text to display
+        :return: None
+        """
+        item = QTableWidgetItem(str(text))
+        item.setTextAlignment(Qt.AlignCenter)
+        table.setItem(row, col, item)
+
     # ==================================================================================================================
     # USERS
     # ==================================================================================================================
@@ -112,6 +132,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ==================================================================================================================
     # STATIONS
     # ==================================================================================================================
+    def __populate_stations_combo(self, stations: list):
+        """
+        Populate stations combo box with station list.
+
+        :param stations: List of Station objects
+        :return: None
+        """
+        self.stations_combo.clear()
+        for station in stations:
+            # Store station_id as itemData for easy filtering
+            self.stations_combo.addItem(station.station_name, station.station_id)
+
     def __create_station_row(self, row: int, station):
         """
         Create and populate a single station row in the table.
@@ -243,6 +275,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.statusbar.showMessage("No stations available", 3000)
                 return
 
+            # Populate combo (only if empty - first load)
+            if self.stations_combo.count() == 0:
+                self.__populate_stations_combo(stations)
+
             # Use common display method to populate table
             self.__display_stations(stations)
 
@@ -315,6 +351,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Add only the new row to table
                 self.__add_station_to_table(station)
 
+                # Add to combo (incremental update)
+                self.stations_combo.addItem(station.station_name, station.station_id)
+
                 self.statusbar.showMessage("Station created successfully", 2000)
 
             except Exception as error:
@@ -347,6 +386,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Remove row using current index (works even if previous rows were deleted)
             self.stations_table.removeRow(row)
 
+            # Remove from combo (find and remove by station_id)
+            for i in range(self.stations_combo.count()):
+                if self.stations_combo.itemData(i) == station_id:
+                    self.stations_combo.removeItem(i)
+                    break
+
             self.statusbar.showMessage("Station deleted successfully", 2000)
 
         except Exception as error:
@@ -358,7 +403,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ==================================================================================================================
     def __create_stream_row(self, row: int, stream):
         """
-        Create and populate a single station row in the table.
+        Create and populate a single stream row in the table.
 
         Sets up table items with centered text and action buttons for
         the specified row index.
@@ -367,30 +412,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         :param stream: Stream object with data to display
         :return: None
         """
-        print(stream.to_dict())
-        # Create centered items for all columns
-        id_item = QTableWidgetItem(str(stream.stream_id))
-        id_item.setTextAlignment(Qt.AlignCenter)
+        # Basic stream data
+        self.__set_centered_item(self.streams_table, row, 0, stream.external_id)
+        self.__set_centered_item(self.streams_table, row, 1, stream.stream_name)
 
-        station_id_item = QTableWidgetItem(str(stream.station_id))
-        station_id_item.setTextAlignment(Qt.AlignCenter)
+        # Broadcast data or placeholders
+        if not stream.broadcast:
+            for col in range(2, 8):
+                self.__set_centered_item(self.streams_table, row, col, "-")
+        else:
+            self.__set_centered_item(self.streams_table, row, 2, stream.broadcast.url)
+            self.__set_centered_item(self.streams_table, row, 3, stream.broadcast.user)
+            self.__set_centered_item(self.streams_table, row, 4, stream.broadcast.channels)
+            self.__set_centered_item(self.streams_table, row, 5, stream.broadcast.sample_rate)
+            self.__set_centered_item(self.streams_table, row, 6, stream.broadcast.block_size)
+            self.__set_centered_item(self.streams_table, row, 7, stream.broadcast.bitrate)
 
-        external_id_item = QTableWidgetItem(str(stream.external_id))
-        external_id_item.setTextAlignment(Qt.AlignCenter)
-
-        name_item = QTableWidgetItem(str(stream.stream_name))
-        name_item.setTextAlignment(Qt.AlignCenter)
-
-        self.streams_table.setItem(row, 0, id_item)
-        self.streams_table.setItem(row, 1, station_id_item)
-        self.streams_table.setItem(row, 2, external_id_item)
-        self.streams_table.setItem(row, 3, name_item)
-
-        # Create action buttons for the row
+        # Create action buttons
         edit_btn = QPushButton("Edit")
         delete_btn = QPushButton("Delete")
-
-        # Connect delete button with item reference
 
         actions_widget = QWidget()
         actions_layout = QHBoxLayout(actions_widget)
@@ -398,7 +438,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         actions_layout.addWidget(delete_btn)
         actions_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.streams_table.setCellWidget(row, 4, actions_widget)
+        self.streams_table.setCellWidget(row, 8, actions_widget)
 
     def __display_streams(self, streams: list):
         """
@@ -445,6 +485,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__logger.error(f"Failed to load streams table: {error}")
             self.statusbar.showMessage("Error loading streams. Check logs for details.", 5000)
 
+    def __add_stream_to_table(self, stream):
+        """
+        Add a single strean row to the table.
+
+        Creates a new row with stream data and action buttons (Edit/Delete).
+
+        :param stream: Stream object to add
+        :return: None
+        """
+        # Insert new row at the end
+        row = self.streams_table.rowCount()
+        self.streams_table.insertRow(row)
+
+        # Create row using common method
+        self.__create_stream_row(row, stream)
+
     def __setup_streams_table(self):
         """
         Configure the streams table widget with columns and display settings.
@@ -454,7 +510,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         :return: None
         """
-        columns = ["ID", "STATION ID", "EXTERNAL ID", "NAME", "Actions"]
+        columns = ["EXTERNAL ID", "NAME", "URL", "USER", "CHANNELS", "SAMPLERATE", "BLOCKSIZE", "BITRATE", "ACTIONS"]
 
         self.streams_table.setColumnCount(len(columns))
         self.streams_table.setHorizontalHeaderLabels(columns)
@@ -468,28 +524,105 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Configure column widths: ID and Actions fixed, Name fixed, Path takes rest
         header = self.streams_table.horizontalHeader()
 
-        # ID column: small fixed width for numeric values
+        # EXTERNAL ID column: small fixed width for numeric values
         header.setSectionResizeMode(0, QHeaderView.Fixed)
-        self.streams_table.setColumnWidth(0, 60)
+        self.streams_table.setColumnWidth(0, 140)
 
-        # Station ID column: small fixed width for numeric values
-        header.setSectionResizeMode(1, QHeaderView.Fixed)
-        self.streams_table.setColumnWidth(1, 140)
+        # NAME column: small fixed width for numeric values
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        # self.streams_table.setColumnWidth(0, 60)
 
-        # External ID column: small fixed width for numeric values
-        header.setSectionResizeMode(2, QHeaderView.Fixed)
-        self.streams_table.setColumnWidth(2, 140)
+        # URL column: small fixed width for numeric values
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        # self.streams_table.setColumnWidth(0, 60)
 
-        # Name column: fixed width (user can resize manually)
-        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        # USER column: small fixed width for numeric values
+        header.setSectionResizeMode(3, QHeaderView.Fixed)
+        self.streams_table.setColumnWidth(3, 90)
 
-        # Actions column: fixed width to fit Edit/Delete buttons
+        # CHANNELS column: small fixed width for numeric values
         header.setSectionResizeMode(4, QHeaderView.Fixed)
-        self.streams_table.setColumnWidth(4, 180)
+        self.streams_table.setColumnWidth(4, 120)
+
+        # SAMPLERATE column: small fixed width for numeric values
+        header.setSectionResizeMode(5, QHeaderView.Fixed)
+        self.streams_table.setColumnWidth(5, 140)
+
+        # BLOCKSIZE column: small fixed width for numeric values
+        header.setSectionResizeMode(6, QHeaderView.Fixed)
+        self.streams_table.setColumnWidth(6, 120)
+
+        # BITRATE column: small fixed width for numeric values
+        header.setSectionResizeMode(7, QHeaderView.Fixed)
+        self.streams_table.setColumnWidth(7, 120)
+
+        # ACTIONS column: small fixed width for numeric values
+        header.setSectionResizeMode(8, QHeaderView.Fixed)
+        self.streams_table.setColumnWidth(8, 180)
 
         self.streams_table.verticalHeader().setDefaultSectionSize(40)
 
+    def add_stream(self):
+        """
+        Show dialog to add a new stream and save to database.
 
+        Creates stream record first, then creates associated broadcast
+        configuration if stream creation succeeds.
+
+        :return: None
+        """
+        # Extract station data from existing combo (reuse cached data)
+        stations_data = [
+            (self.stations_combo.itemData(i), self.stations_combo.itemText(i))
+            for i in range(self.stations_combo.count())
+        ]
+
+        dialog = AddStreamDialog(stations_data, self, self.__logger)
+
+        if dialog.exec() == QDialog.Accepted:
+            try:
+                data = dialog.get_stream_data()
+
+                # Step 1: Create stream record
+                success, stream = self.__manager.create_stream(
+                    stream_name=data['name'],
+                    external_id=data['external_id'],
+                    station_id=data['station_id']
+                )
+
+                # Check if stream creation failed
+                if not success:
+                    self.statusbar.showMessage(f"Error: {stream}", 5000)
+                    return
+
+                # Step 2: Create broadcast configuration
+                success, broadcast = self.__manager.create_broadcast(
+                    stream_id=stream.stream_id,
+                    name=data['name'],
+                    url=data['url'],
+                    user=data['user'],
+                    password=data['password'],
+                    channels=data['channels'],
+                    sample_rate=data['sample_rate'],
+                    block_size=data['block_size'],
+                    bitrate=data['bit_rate']
+                )
+
+                # Check if broadcast creation failed
+                if not success:
+                    return
+
+                # Assign broadcast to stream object (avoid DB query)
+                stream.broadcast = broadcast
+
+                # Both succeeded - add to table
+                self.__add_stream_to_table(stream)
+
+                self.statusbar.showMessage("Stream created successfully", 2000)
+
+            except Exception as error:
+                self.__logger.error(f"Error creating stream: {error}")
+                self.statusbar.showMessage("Unexpected error creating stream", 5000)
 
     # ==================================================================================================================
     # TRANSMISSION

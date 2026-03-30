@@ -159,6 +159,14 @@ class Manager:
     # ==================================================================================================================
     # BROADCAST
     # ==================================================================================================================
+    def create_broadcast(self, **kwargs):
+        """
+        Create broadcast configuration for a stream.
+
+        :param kwargs: Broadcast attributes (stream_id, url, user, password, channels, sample_rate, block_size, bitrate)
+        :return: Tuple (success: bool, broadcast or error_message)
+        """
+        return self.__broadcast.create(**kwargs)
 
     # ==================================================================================================================
     # SINGLE TRANSMISSIONS

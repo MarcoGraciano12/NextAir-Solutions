@@ -315,7 +315,7 @@
                  <enum>QTabWidget::TabShape::Rounded</enum>
                 </property>
                 <property name="currentIndex">
-                 <number>2</number>
+                 <number>3</number>
                 </property>
                 <property name="elideMode">
                  <enum>Qt::TextElideMode::ElideMiddle</enum>
@@ -363,7 +363,7 @@
                         <set>Qt::AlignmentFlag::AlignCenter</set>
                        </property>
                        <property name="placeholderText">
-                        <string>STATION NAME HERE</string>
+                        <string>STATION NAME</string>
                        </property>
                       </widget>
                      </item>
@@ -451,12 +451,26 @@
                       </spacer>
                      </item>
                      <item>
+                      <widget class="QComboBox" name="stations_combo">
+                       <property name="placeholderText">
+                        <string>STATIONS</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="Line" name="line_9">
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
                       <widget class="QLineEdit" name="search_stream_line">
                        <property name="alignment">
                         <set>Qt::AlignmentFlag::AlignCenter</set>
                        </property>
                        <property name="placeholderText">
-                        <string>STREAM NAME HERE</string>
+                        <string>STREAM NAME</string>
                        </property>
                       </widget>
                      </item>
@@ -489,9 +503,9 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="reload_streams_table_button">
+                      <widget class="QPushButton" name="refresh_streams_table_button">
                        <property name="text">
-                        <string>RELOAD TABLE</string>
+                        <string>REFRESH TABLE</string>
                        </property>
                       </widget>
                      </item>

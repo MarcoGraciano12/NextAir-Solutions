@@ -281,6 +281,18 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer_5)
 
+        self.stations_combo = QComboBox(self.widget_7)
+        self.stations_combo.setObjectName(u"stations_combo")
+
+        self.horizontalLayout_3.addWidget(self.stations_combo)
+
+        self.line_9 = QFrame(self.widget_7)
+        self.line_9.setObjectName(u"line_9")
+        self.line_9.setFrameShape(QFrame.Shape.VLine)
+        self.line_9.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_3.addWidget(self.line_9)
+
         self.search_stream_line = QLineEdit(self.widget_7)
         self.search_stream_line.setObjectName(u"search_stream_line")
         self.search_stream_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -423,7 +435,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(1)
-        self.menu_tab.setCurrentIndex(2)
+        self.menu_tab.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -445,7 +457,8 @@ class Ui_MainWindow(object):
         self.add_station_button.setText(QCoreApplication.translate("MainWindow", u"ADD STATION", None))
         self.refresh_stations_table_button.setText(QCoreApplication.translate("MainWindow", u"REFRESH TABLE", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.stations), QCoreApplication.translate("MainWindow", u"STATIONS", None))
-        self.search_stream_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STREAM NAME HERE", None))
+        self.stations_combo.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STATIONS", None))
+        self.search_stream_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STREAM NAME", None))
         self.search_stream_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
         self.add_stream_button.setText(QCoreApplication.translate("MainWindow", u"ADD STREAM", None))
         self.reload_streams_table_button.setText(QCoreApplication.translate("MainWindow", u"RELOAD TABLE", None))
