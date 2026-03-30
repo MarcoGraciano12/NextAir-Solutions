@@ -88,6 +88,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.__initialized_tabs.add(index)  # Mark as initialized
 
+    def __confirm_deletion(self, item_name: str, item_type: str = "item") -> bool:
+        """
+        Show confirmation dialog for deletion action.
+
+        Displays a Yes/No dialog asking user to confirm deletion of an item.
+
+        :param item_name: Name of the item to delete (displayed in message)
+        :param item_type: Type of item (e.g., "station", "stream", "schedule")
+        :return: True if user confirmed deletion, False if cancelled
+        """
+        reply = QMessageBox.question(
+            self,
+            "Confirm Deletion",
+            f"Are you sure you want to delete {item_type} '{item_name}'?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No  # Default to No for safety
+        )
+
+        return reply == QMessageBox.Yes
+
     # ==================================================================================================================
     # USERS
     # ==================================================================================================================
@@ -278,6 +298,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 edit_btn = QPushButton("Edit")
                 delete_btn = QPushButton("Delete")
 
+                # Connect button signals
+                delete_btn.clicked.connect(lambda checked, item=id_item: self.remove_station(item))
+
                 actions_widget = QWidget()
                 actions_layout = QHBoxLayout(actions_widget)
                 actions_layout.addWidget(edit_btn)
@@ -296,8 +319,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def add_station(self):
         pass
 
-    def remove_station(self):
-        pass
+    def remove_station(self, id_item: QTableWidgetItem):
+        """
+        Remove a station from database and table UI.
+
+        :param id_item: QTableWidgetItem reference from the ID column
+        :return: None
+        """
+        try:
+            # Get current row index from the item reference
+            row = self.stations_table.row(id_item)
+            station_id = int(id_item.text())
+            station_name = self.stations_table.item(row, 1).text()
+
+            # Ask for confirmation before deleting
+            if not self.__confirm_deletion(station_name, "station"):
+                return
+
+            success, msg = self.__manager.delete_station(station_id)
+
+            if not success:
+                self.statusbar.showMessage(f"Error: {msg}", 5000)
+                return
+
+            # Remove row using current index (works even if previous rows were deleted)
+            self.stations_table.removeRow(row)
+
+            self.statusbar.showMessage("Station deleted successfully", 2000)
+
+        except Exception as error:
+            self.__logger.error(f"Error removing station: {error}")
+            self.statusbar.showMessage("Unexpected error deleting station", 5000)
 
     def edit_station(self):
         pass

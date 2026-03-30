@@ -89,6 +89,15 @@ class Manager:
         """
         return self.__stations.get_all()
 
+    def delete_station(self, station_id: int):
+        """
+        Delete a station from the database by its ID.
+
+        :param station_id: Unique identifier of the station to delete
+        :return: Tuple (success: bool, message: str)
+        """
+        return self.__stations.delete(station_id)
+
     # ==================================================================================================================
     # STREAMS
     # ==================================================================================================================
