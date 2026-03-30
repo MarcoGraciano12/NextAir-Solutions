@@ -199,6 +199,74 @@ class Ui_MainWindow(object):
         self.menu_tab.addTab(self.INPUTS, "")
         self.stations = QWidget()
         self.stations.setObjectName(u"stations")
+        self.verticalLayout_8 = QVBoxLayout(self.stations)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.widget_9 = QWidget(self.stations)
+        self.widget_9.setObjectName(u"widget_9")
+        self.widget_9.setMaximumSize(QSize(16777215, 100))
+        self.horizontalLayout_4 = QHBoxLayout(self.widget_9)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_6)
+
+        self.search_station_line = QLineEdit(self.widget_9)
+        self.search_station_line.setObjectName(u"search_station_line")
+        self.search_station_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_4.addWidget(self.search_station_line)
+
+        self.search_station_button = QPushButton(self.widget_9)
+        self.search_station_button.setObjectName(u"search_station_button")
+
+        self.horizontalLayout_4.addWidget(self.search_station_button)
+
+        self.line_7 = QFrame(self.widget_9)
+        self.line_7.setObjectName(u"line_7")
+        self.line_7.setFrameShape(QFrame.Shape.VLine)
+        self.line_7.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_4.addWidget(self.line_7)
+
+        self.add_station_button = QPushButton(self.widget_9)
+        self.add_station_button.setObjectName(u"add_station_button")
+
+        self.horizontalLayout_4.addWidget(self.add_station_button)
+
+        self.line_8 = QFrame(self.widget_9)
+        self.line_8.setObjectName(u"line_8")
+        self.line_8.setFrameShape(QFrame.Shape.VLine)
+        self.line_8.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_4.addWidget(self.line_8)
+
+        self.reload_stations_table_button = QPushButton(self.widget_9)
+        self.reload_stations_table_button.setObjectName(u"reload_stations_table_button")
+
+        self.horizontalLayout_4.addWidget(self.reload_stations_table_button)
+
+
+        self.verticalLayout_8.addWidget(self.widget_9)
+
+        self.line_6 = QFrame(self.stations)
+        self.line_6.setObjectName(u"line_6")
+        self.line_6.setFrameShape(QFrame.Shape.HLine)
+        self.line_6.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.verticalLayout_8.addWidget(self.line_6)
+
+        self.widget_10 = QWidget(self.stations)
+        self.widget_10.setObjectName(u"widget_10")
+        self.gridLayout_6 = QGridLayout(self.widget_10)
+        self.gridLayout_6.setObjectName(u"gridLayout_6")
+        self.stations_table = QTableWidget(self.widget_10)
+        self.stations_table.setObjectName(u"stations_table")
+
+        self.gridLayout_6.addWidget(self.stations_table, 0, 0, 1, 1)
+
+
+        self.verticalLayout_8.addWidget(self.widget_10)
+
         self.menu_tab.addTab(self.stations, "")
         self.streams = QWidget()
         self.streams.setObjectName(u"streams")
@@ -302,6 +370,15 @@ class Ui_MainWindow(object):
         self.theme_combo.addItem("")
         self.theme_combo.addItem("")
         self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
+        self.theme_combo.addItem("")
         self.theme_combo.setObjectName(u"theme_combo")
 
         self.horizontalLayout_2.addWidget(self.theme_combo)
@@ -346,7 +423,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(1)
-        self.menu_tab.setCurrentIndex(3)
+        self.menu_tab.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -363,6 +440,10 @@ class Ui_MainWindow(object):
         self.logout_button.setText(QCoreApplication.translate("MainWindow", u"LOGOUT", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.users), QCoreApplication.translate("MainWindow", u"USERS", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.INPUTS), QCoreApplication.translate("MainWindow", u"INPUTS", None))
+        self.search_station_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STATION NAME HERE", None))
+        self.search_station_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
+        self.add_station_button.setText(QCoreApplication.translate("MainWindow", u"ADD STATION", None))
+        self.reload_stations_table_button.setText(QCoreApplication.translate("MainWindow", u"RELOAD TABLE", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.stations), QCoreApplication.translate("MainWindow", u"STATIONS", None))
         self.search_stream_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STREAM NAME HERE", None))
         self.search_stream_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
@@ -381,6 +462,15 @@ class Ui_MainWindow(object):
         self.theme_combo.setItemText(7, QCoreApplication.translate("MainWindow", u"light_red.xml", None))
         self.theme_combo.setItemText(8, QCoreApplication.translate("MainWindow", u"light_teal.xml", None))
         self.theme_combo.setItemText(9, QCoreApplication.translate("MainWindow", u"light_yellow.xml", None))
+        self.theme_combo.setItemText(10, QCoreApplication.translate("MainWindow", u"dark_amber.xml", None))
+        self.theme_combo.setItemText(11, QCoreApplication.translate("MainWindow", u"dark_blue.xml", None))
+        self.theme_combo.setItemText(12, QCoreApplication.translate("MainWindow", u"dark_cyan.xml", None))
+        self.theme_combo.setItemText(13, QCoreApplication.translate("MainWindow", u"dark_lightgreen.xml", None))
+        self.theme_combo.setItemText(14, QCoreApplication.translate("MainWindow", u"dark_pink.xml", None))
+        self.theme_combo.setItemText(15, QCoreApplication.translate("MainWindow", u"dark_purple.xml", None))
+        self.theme_combo.setItemText(16, QCoreApplication.translate("MainWindow", u"dark_red.xml", None))
+        self.theme_combo.setItemText(17, QCoreApplication.translate("MainWindow", u"dark_teal.xml", None))
+        self.theme_combo.setItemText(18, QCoreApplication.translate("MainWindow", u"dark_yellow.xml", None))
 
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.SETTINGS), QCoreApplication.translate("MainWindow", u"SETTINGS", None))
     # retranslateUi

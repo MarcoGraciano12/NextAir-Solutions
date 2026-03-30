@@ -77,16 +77,16 @@ class StationController:
         """
         Get all stations.
 
-        :return: Tuple (success: bool, result: list of Stations or error message)
+        :return: List of Stations or None
         """
         try:
             with Session(engine) as session:
                 stations = session.query(Station).all()
-                return True, stations
+                return stations
 
         except Exception as e:
             self.__logger.error(f"Error retrieving stations: {e}")
-            return False, "Error retrieving stations"
+            return None
 
     def get_by_name(self, station_name: str):
         """

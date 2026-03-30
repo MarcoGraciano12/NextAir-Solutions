@@ -315,7 +315,7 @@
                  <enum>QTabWidget::TabShape::Rounded</enum>
                 </property>
                 <property name="currentIndex">
-                 <number>3</number>
+                 <number>2</number>
                 </property>
                 <property name="elideMode">
                  <enum>Qt::TextElideMode::ElideMiddle</enum>
@@ -334,6 +334,94 @@
                  <attribute name="title">
                   <string>STATIONS</string>
                  </attribute>
+                 <layout class="QVBoxLayout" name="verticalLayout_8">
+                  <item>
+                   <widget class="QWidget" name="widget_9" native="true">
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>100</height>
+                     </size>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_4">
+                     <item>
+                      <spacer name="horizontalSpacer_6">
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="search_station_line">
+                       <property name="alignment">
+                        <set>Qt::AlignmentFlag::AlignCenter</set>
+                       </property>
+                       <property name="placeholderText">
+                        <string>STATION NAME HERE</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="search_station_button">
+                       <property name="text">
+                        <string>SEARCH</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="Line" name="line_7">
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="add_station_button">
+                       <property name="text">
+                        <string>ADD STATION</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="Line" name="line_8">
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="reload_stations_table_button">
+                       <property name="text">
+                        <string>RELOAD TABLE</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="Line" name="line_6">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="widget_10" native="true">
+                    <layout class="QGridLayout" name="gridLayout_6">
+                     <item row="0" column="0">
+                      <widget class="QTableWidget" name="stations_table"/>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
                 </widget>
                 <widget class="QWidget" name="streams">
                  <attribute name="title">
@@ -511,6 +599,51 @@
                        <item>
                         <property name="text">
                          <string>light_yellow.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_amber.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_blue.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_cyan.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_lightgreen.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_pink.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_purple.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_red.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_teal.xml</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>dark_yellow.xml</string>
                         </property>
                        </item>
                       </widget>

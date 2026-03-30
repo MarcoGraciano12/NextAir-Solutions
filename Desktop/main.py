@@ -10,8 +10,7 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QFormLayout, QWidget, QLineEdit, QPushButton, QLabel, QTableWidget, QTableWidgetItem,
     QHBoxLayout, QMessageBox, QComboBox, QDialog, QDialogButtonBox, QHeaderView
 )
-# from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLineEdit, QComboBox, QDialogButtonBox, QLabel, QFormLayout
-
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QAction
 from resources.view import Ui_MainWindow
 from qt_material import apply_stylesheet
@@ -37,11 +36,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
+        self.__logger = logger or getLogger(self.__class__.__name__)
+
         # Streaming Operations Controller
         self.__manager = Manager()
 
         # Setup Tables
         self.__setup_streams_table()
+        self.__setup_stations_table()
+
+        self.__load_stations_table()
 
         self.login_button.pressed.connect(self.login)
         self.logout_button.pressed.connect(self.logout)
@@ -52,7 +56,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.__initialized_tabs = set()  # Track initialized tabs
         self.menu_tab.currentChanged.connect(self.__on_menu_tab_changed)
 
-        self.__logger = logger or getLogger(self.__class__.__name__)
+
 
     def login(self):
         self.stackedWidget.setCurrentIndex(1)
@@ -98,8 +102,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def find_stream(self):
         pass
-
-    from PySide6.QtWidgets import QHeaderView
 
     def __setup_streams_table(self):
         """
@@ -192,6 +194,125 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.users_return_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
         # self.__setup_users_table()
 
+    # ==================================================================================================================
+    # STATIONS
+    # ==================================================================================================================
+
+    def __setup_stations_table(self):
+        """
+        Configure the stations table widget with columns and display settings.
+
+        Sets up column headers, disables editing, enables row selection,
+        and configures column widths (ID and Actions fixed, Name/Path stretch).
+
+        :return: None
+        """
+        columns = ["ID", "Name", "Path", "Actions"]
+
+        self.stations_table.setColumnCount(len(columns))
+        self.stations_table.setHorizontalHeaderLabels(columns)
+
+        # Prevent direct cell editing - use Edit button instead
+        self.stations_table.setEditTriggers(QTableWidget.NoEditTriggers)
+
+        # Select entire row when clicking any cell
+        self.stations_table.setSelectionBehavior(QTableWidget.SelectRows)
+
+        # Configure column widths: ID and Actions fixed, Name fixed, Path takes rest
+        header = self.stations_table.horizontalHeader()
+
+        # ID column: small fixed width for numeric values
+        header.setSectionResizeMode(0, QHeaderView.Fixed)
+        self.stations_table.setColumnWidth(0, 60)
+
+        # Name column: fixed width (user can resize manually)
+        header.setSectionResizeMode(1, QHeaderView.Interactive)
+        self.stations_table.setColumnWidth(1, 120)
+
+        # Path column: stretches to fill all remaining space
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+
+        # Actions column: fixed width to fit Edit/Delete buttons
+        header.setSectionResizeMode(3, QHeaderView.Fixed)
+        self.stations_table.setColumnWidth(3, 180)
+
+        self.stations_table.verticalHeader().setDefaultSectionSize(40)
+
+    def __load_stations_table(self):
+        """
+        Load and display all stations from database into the stations table widget.
+
+        Populates the table with station data and creates action buttons (Edit/Delete)
+        for each row. Clears existing rows before loading new data.
+
+        :return: None
+        """
+        try:
+            stations = self.__manager.get_all_stations()
+
+            if not stations:
+                self.__logger.warning("No stations found in database")
+                self.statusbar.showMessage("No stations available", 3000)
+                return
+
+            # Clear existing rows to avoid duplicates
+            self.stations_table.setRowCount(0)
+            self.stations_table.setRowCount(len(stations))
+
+            for i, station in enumerate(stations):
+                # Create centered items for all columns
+                id_item = QTableWidgetItem(str(station.station_id))
+                id_item.setTextAlignment(Qt.AlignCenter)
+
+                name_item = QTableWidgetItem(str(station.station_name))
+                name_item.setTextAlignment(Qt.AlignCenter)
+
+                path_item = QTableWidgetItem(str(station.files_path))
+                path_item.setTextAlignment(Qt.AlignCenter)
+
+                self.stations_table.setItem(i, 0, id_item)
+                self.stations_table.setItem(i, 1, name_item)
+                self.stations_table.setItem(i, 2, path_item)
+
+                # Create action buttons for each station row
+                edit_btn = QPushButton("Edit")
+                delete_btn = QPushButton("Delete")
+
+                actions_widget = QWidget()
+                actions_layout = QHBoxLayout(actions_widget)
+                actions_layout.addWidget(edit_btn)
+                actions_layout.addWidget(delete_btn)
+                actions_layout.setContentsMargins(0, 0, 0, 0)
+
+                self.stations_table.setCellWidget(i, 3, actions_widget)
+
+            self.__logger.info(f"Loaded {len(stations)} stations into table")
+            self.statusbar.showMessage(f"{len(stations)} stations loaded successfully", 2000)
+
+        except Exception as error:
+            self.__logger.error(f"Failed to load stations table: {error}")
+            self.statusbar.showMessage("Error loading stations. Check logs for details.", 5000)
+
+    def add_station(self):
+        pass
+
+    def remove_station(self):
+        pass
+
+    def edit_station(self):
+        pass
+
+    def find_station(self):
+        pass
+
+
+    # ==================================================================================================================
+    # STREAMS
+    # ==================================================================================================================
+
+    # ==================================================================================================================
+    # TRANSMISSION
+    # ==================================================================================================================
     #
     # @staticmethod
     # def change_theme(theme_name: str) -> None:
@@ -586,17 +707,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #     else:
     #         QMessageBox.warning(dialog, "Error", "Failed to create user")
     #
-    # # ==================================================================================================================
-    # # STATIONS
-    # # ==================================================================================================================
-    #
-    # # ==================================================================================================================
-    # # STREAMS
-    # # ==================================================================================================================
-    #
-    # # ==================================================================================================================
-    # # TRANSMISSION
-    # # ==================================================================================================================
+
 
 
 if __name__ == "__main__":
