@@ -428,9 +428,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__set_centered_item(self.streams_table, row, 6, stream.broadcast.block_size)
             self.__set_centered_item(self.streams_table, row, 7, stream.broadcast.bitrate)
 
+        # Get external_id item reference for delete button
+        stream_item = self.streams_table.item(row, 1)
+
         # Create action buttons
         edit_btn = QPushButton("Edit")
         delete_btn = QPushButton("Delete")
+
+        # Connect delete button with item reference
+        delete_btn.clicked.connect(lambda checked, item=stream_item: self.remove_stream(item))
 
         actions_widget = QWidget()
         actions_layout = QHBoxLayout(actions_widget)
@@ -623,6 +629,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             except Exception as error:
                 self.__logger.error(f"Error creating stream: {error}")
                 self.statusbar.showMessage("Unexpected error creating stream", 5000)
+
+    def remove_stream(self, id_item: QTableWidgetItem):
+        """
+        Remove a stream from database and table UI.
+
+        :param id_item: QTableWidgetItem reference from the ID column
+        :return: None
+        """
+        try:
+            # Get current row index from the item reference
+            row = self.streams_table.row(id_item)
+            stream_name = self.streams_table.item(row, 1).text()
+
+            # Ask for confirmation before deleting
+            if not self.__confirm_deletion(stream_name, "stream"):
+                return
+
+            success, msg = self.__manager.delete_stream(stream_name)
+
+            if not success:
+                self.statusbar.showMessage(f"Error: {msg}", 5000)
+                return
+
+            # Remove row using current index (works even if previous rows were deleted)
+            self.streams_table.removeRow(row)
+
+            self.statusbar.showMessage("Stream deleted successfully", 2000)
+
+        except Exception as error:
+            self.__logger.error(f"Error removing stream: {error}")
+            self.statusbar.showMessage("Unexpected error deleting stream", 5000)
 
     # ==================================================================================================================
     # TRANSMISSION

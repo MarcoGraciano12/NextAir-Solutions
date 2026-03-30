@@ -168,6 +168,15 @@ class Manager:
         """
         return self.__broadcast.create(**kwargs)
 
+    def delete_broadcast(self, broadcast_id: int):
+        """
+        Delete broadcast configuration from database.
+
+        :param broadcast_id: ID of the broadcast to delete
+        :return: Tuple (success: bool, message: str)
+        """
+        return self.__broadcast.delete(broadcast_id)
+
     # ==================================================================================================================
     # SINGLE TRANSMISSIONS
     # ==================================================================================================================
