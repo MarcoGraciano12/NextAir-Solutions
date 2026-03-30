@@ -18,6 +18,7 @@ from logging import Logger, getLogger
 from passlib.hash import pbkdf2_sha256
 from manager import Manager
 import logging
+from dialogs import AddStationDialog
 
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -55,6 +56,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # TabWidget Main Menu
         self.__initialized_tabs = set()  # Track initialized tabs
         self.menu_tab.currentChanged.connect(self.__on_menu_tab_changed)
+
+        # STATION ACTIONS
+        self.add_station_button.pressed.connect(self.add_station)
 
 
 
@@ -217,6 +221,48 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ==================================================================================================================
     # STATIONS
     # ==================================================================================================================
+    def __add_station_to_table(self, station):
+        """
+        Add a single station row to the table.
+
+        Creates a new row with station data and action buttons (Edit/Delete).
+
+        :param station: Station object to add
+        :return: None
+        """
+        # Insert new row at the end
+        row = self.stations_table.rowCount()
+        self.stations_table.insertRow(row)
+
+        # Create centered items for all columns
+        id_item = QTableWidgetItem(str(station.station_id))
+        id_item.setTextAlignment(Qt.AlignCenter)
+
+        name_item = QTableWidgetItem(str(station.station_name))
+        name_item.setTextAlignment(Qt.AlignCenter)
+
+        path_item = QTableWidgetItem(str(station.files_path))
+        path_item.setTextAlignment(Qt.AlignCenter)
+
+        self.stations_table.setItem(row, 0, id_item)
+        self.stations_table.setItem(row, 1, name_item)
+        self.stations_table.setItem(row, 2, path_item)
+
+        # Create action buttons for the new row
+        edit_btn = QPushButton("Edit")
+        delete_btn = QPushButton("Delete")
+
+        # Connect delete button with item reference
+        delete_btn.clicked.connect(lambda checked, item=id_item: self.remove_station(item))
+
+        # Create widget container for buttons
+        actions_widget = QWidget()
+        actions_layout = QHBoxLayout(actions_widget)
+        actions_layout.addWidget(edit_btn)
+        actions_layout.addWidget(delete_btn)
+        actions_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.stations_table.setCellWidget(row, 3, actions_widget)
 
     def __setup_stations_table(self):
         """
@@ -317,7 +363,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage("Error loading stations. Check logs for details.", 5000)
 
     def add_station(self):
-        pass
+        """
+        Show dialog to add a new station and save to database.
+
+        Opens the add station dialog, validates input, creates the station
+        in database, and adds it to the table if successful.
+
+        :return: None
+        """
+        dialog = AddStationDialog(self, self.__logger)
+
+        if dialog.exec() == QDialog.Accepted:
+            try:
+                data = dialog.get_station_data()
+
+                # Create station in database
+                success, station = self.__manager.create_station(data['name'], data['path'])
+
+                # Check if creation failed
+                if not success:
+                    self.statusbar.showMessage(f"Error: {station}", 5000)
+                    return
+
+                # Add only the new row to table
+                self.__add_station_to_table(station)
+
+                self.statusbar.showMessage("Station created successfully", 2000)
+
+            except Exception as error:
+                self.__logger.error(f"Error creating station: {error}")
+                self.statusbar.showMessage("Unexpected error creating station", 5000)
 
     def remove_station(self, id_item: QTableWidgetItem):
         """

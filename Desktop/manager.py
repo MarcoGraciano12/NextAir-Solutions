@@ -98,6 +98,15 @@ class Manager:
         """
         return self.__stations.delete(station_id)
 
+    def create_station(self, *kwargs):
+        """
+        Create a new station in the database.
+
+        :param kwargs: Station data (name, path, etc.)
+        :return: Tuple (success: bool, message: str)
+        """
+        return self.__stations.create(*kwargs)
+
     # ==================================================================================================================
     # STREAMS
     # ==================================================================================================================
