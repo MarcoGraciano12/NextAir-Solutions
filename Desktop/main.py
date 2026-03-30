@@ -228,63 +228,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ==================================================================================================================
     # STATIONS
     # ==================================================================================================================
-    def __display_stations(self, stations: list):
+    def __create_station_row(self, row: int, station):
         """
-        Display a list of stations in the table.
+        Create and populate a single station row in the table.
 
-        Clears existing rows and populates table with provided stations
-        including action buttons (Edit/Delete) for each row.
+        Sets up table items with centered text and action buttons for
+        the specified row index.
 
-        :param stations: List of Station objects to display
+        :param row: Table row index to populate
+        :param station: Station object with data to display
         :return: None
         """
-        # Clear existing rows
-        self.stations_table.setRowCount(0)
-        self.stations_table.setRowCount(len(stations))
-
-        for i, station in enumerate(stations):
-            # Create centered items for all columns
-            id_item = QTableWidgetItem(str(station.station_id))
-            id_item.setTextAlignment(Qt.AlignCenter)
-
-            name_item = QTableWidgetItem(str(station.station_name))
-            name_item.setTextAlignment(Qt.AlignCenter)
-
-            path_item = QTableWidgetItem(str(station.files_path))
-            path_item.setTextAlignment(Qt.AlignCenter)
-
-            self.stations_table.setItem(i, 0, id_item)
-            self.stations_table.setItem(i, 1, name_item)
-            self.stations_table.setItem(i, 2, path_item)
-
-            # Create action buttons for each station row
-            edit_btn = QPushButton("Edit")
-            delete_btn = QPushButton("Delete")
-
-            # Connect delete button with item reference
-            delete_btn.clicked.connect(lambda checked, item=id_item: self.remove_station(item))
-
-            actions_widget = QWidget()
-            actions_layout = QHBoxLayout(actions_widget)
-            actions_layout.addWidget(edit_btn)
-            actions_layout.addWidget(delete_btn)
-            actions_layout.setContentsMargins(0, 0, 0, 0)
-
-            self.stations_table.setCellWidget(i, 3, actions_widget)
-
-    def __add_station_to_table(self, station):
-        """
-        Add a single station row to the table.
-
-        Creates a new row with station data and action buttons (Edit/Delete).
-
-        :param station: Station object to add
-        :return: None
-        """
-        # Insert new row at the end
-        row = self.stations_table.rowCount()
-        self.stations_table.insertRow(row)
-
         # Create centered items for all columns
         id_item = QTableWidgetItem(str(station.station_id))
         id_item.setTextAlignment(Qt.AlignCenter)
@@ -299,14 +253,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.stations_table.setItem(row, 1, name_item)
         self.stations_table.setItem(row, 2, path_item)
 
-        # Create action buttons for the new row
+        # Create action buttons for the row
         edit_btn = QPushButton("Edit")
         delete_btn = QPushButton("Delete")
 
         # Connect delete button with item reference
         delete_btn.clicked.connect(lambda checked, item=id_item: self.remove_station(item))
 
-        # Create widget container for buttons
         actions_widget = QWidget()
         actions_layout = QHBoxLayout(actions_widget)
         actions_layout.addWidget(edit_btn)
@@ -314,6 +267,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         actions_layout.setContentsMargins(0, 0, 0, 0)
 
         self.stations_table.setCellWidget(row, 3, actions_widget)
+
+    def __display_stations(self, stations: list):
+        """
+        Display a list of stations in the table.
+
+        Clears existing rows and populates table with provided stations
+        including action buttons (Edit/Delete) for each row.
+
+        :param stations: List of Station objects to display
+        :return: None
+        """
+        # Clear and prepare table
+        self.stations_table.setRowCount(0)
+        self.stations_table.setRowCount(len(stations))
+
+        # Create each row using common method
+        for i, station in enumerate(stations):
+            self.__create_station_row(i, station)
+
+    def __add_station_to_table(self, station):
+        """
+        Add a single station row to the table.
+
+        Creates a new row with station data and action buttons (Edit/Delete).
+
+        :param station: Station object to add
+        :return: None
+        """
+        # Insert new row at the end
+        row = self.stations_table.rowCount()
+        self.stations_table.insertRow(row)
+
+        # Create row using common method
+        self.__create_station_row(row, station)
 
     def __setup_stations_table(self):
         """
