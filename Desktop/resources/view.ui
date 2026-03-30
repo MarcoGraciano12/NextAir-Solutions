@@ -315,7 +315,7 @@
                  <enum>QTabWidget::TabShape::Rounded</enum>
                 </property>
                 <property name="currentIndex">
-                 <number>3</number>
+                 <number>2</number>
                 </property>
                 <property name="elideMode">
                  <enum>Qt::TextElideMode::ElideMiddle</enum>
@@ -396,9 +396,9 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="reload_stations_table_button">
+                      <widget class="QPushButton" name="refresh_stations_table_button">
                        <property name="text">
-                        <string>RELOAD TABLE</string>
+                        <string>REFRESH TABLE</string>
                        </property>
                       </widget>
                      </item>

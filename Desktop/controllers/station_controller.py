@@ -108,6 +108,27 @@ class StationController:
             self.__logger.error(f"Error searching station: {e}")
             return False, "Error searching station"
 
+    def search_by_name(self, search_term: str):
+        """
+        Search stations by name using partial matching.
+
+        :param search_term: Text to search in station names (case-insensitive)
+        :return: Tuple (success: bool, stations: list[Station] or error message)
+        """
+        try:
+            with Session(engine) as session:
+                # Use ilike for case-insensitive partial matching
+                stations = session.query(Station).filter(Station.station_name.ilike(f"%{search_term}%")).all()
+
+                if not stations:
+                    return False, f"No stations found matching: {search_term}"
+
+                return True, stations
+
+        except Exception as e:
+            self.__logger.error(f"Error searching stations: {e}")
+            return False, "Error searching stations"
+
     def delete(self, station_id: int):
         """
         Delete station by ID.

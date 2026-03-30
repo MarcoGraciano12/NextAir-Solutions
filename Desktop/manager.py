@@ -103,9 +103,18 @@ class Manager:
         Create a new station in the database.
 
         :param kwargs: Station data (name, path, etc.)
-        :return: Tuple (success: bool, message: str)
+        :return: Tuple (success: bool, station: Station) if success, or (False, error_message: str) if failed
         """
         return self.__stations.create(*kwargs)
+
+    def search_stations(self, search_term: str):
+        """
+        Search stations by name with partial matching.
+
+        :param search_term: Text to search in station names
+        :return: Tuple (success: bool, stations: list or error_message: str)
+        """
+        return self.__stations.search_by_name(search_term)
 
     # ==================================================================================================================
     # STREAMS

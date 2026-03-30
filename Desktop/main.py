@@ -57,10 +57,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.__initialized_tabs = set()  # Track initialized tabs
         self.menu_tab.currentChanged.connect(self.__on_menu_tab_changed)
 
+        # ==============================================================================================================
         # STATION ACTIONS
+        # ==============================================================================================================
+        # Connect add station button
         self.add_station_button.pressed.connect(self.add_station)
-
-
+        # Connect search button
+        self.search_station_button.clicked.connect(self.search_stations)
+        # Search when pressing enter the line edit
+        self.search_station_line.returnPressed.connect(self.search_stations)
+        # Connect refresh button to reload all stations
+        self.refresh_stations_table_button.clicked.connect(self.__load_stations_table)
 
     def login(self):
         self.stackedWidget.setCurrentIndex(1)
@@ -221,6 +228,50 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ==================================================================================================================
     # STATIONS
     # ==================================================================================================================
+    def __display_stations(self, stations: list):
+        """
+        Display a list of stations in the table.
+
+        Clears existing rows and populates table with provided stations
+        including action buttons (Edit/Delete) for each row.
+
+        :param stations: List of Station objects to display
+        :return: None
+        """
+        # Clear existing rows
+        self.stations_table.setRowCount(0)
+        self.stations_table.setRowCount(len(stations))
+
+        for i, station in enumerate(stations):
+            # Create centered items for all columns
+            id_item = QTableWidgetItem(str(station.station_id))
+            id_item.setTextAlignment(Qt.AlignCenter)
+
+            name_item = QTableWidgetItem(str(station.station_name))
+            name_item.setTextAlignment(Qt.AlignCenter)
+
+            path_item = QTableWidgetItem(str(station.files_path))
+            path_item.setTextAlignment(Qt.AlignCenter)
+
+            self.stations_table.setItem(i, 0, id_item)
+            self.stations_table.setItem(i, 1, name_item)
+            self.stations_table.setItem(i, 2, path_item)
+
+            # Create action buttons for each station row
+            edit_btn = QPushButton("Edit")
+            delete_btn = QPushButton("Delete")
+
+            # Connect delete button with item reference
+            delete_btn.clicked.connect(lambda checked, item=id_item: self.remove_station(item))
+
+            actions_widget = QWidget()
+            actions_layout = QHBoxLayout(actions_widget)
+            actions_layout.addWidget(edit_btn)
+            actions_layout.addWidget(delete_btn)
+            actions_layout.setContentsMargins(0, 0, 0, 0)
+
+            self.stations_table.setCellWidget(i, 3, actions_widget)
+
     def __add_station_to_table(self, station):
         """
         Add a single station row to the table.
@@ -321,39 +372,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.statusbar.showMessage("No stations available", 3000)
                 return
 
-            # Clear existing rows to avoid duplicates
-            self.stations_table.setRowCount(0)
-            self.stations_table.setRowCount(len(stations))
-
-            for i, station in enumerate(stations):
-                # Create centered items for all columns
-                id_item = QTableWidgetItem(str(station.station_id))
-                id_item.setTextAlignment(Qt.AlignCenter)
-
-                name_item = QTableWidgetItem(str(station.station_name))
-                name_item.setTextAlignment(Qt.AlignCenter)
-
-                path_item = QTableWidgetItem(str(station.files_path))
-                path_item.setTextAlignment(Qt.AlignCenter)
-
-                self.stations_table.setItem(i, 0, id_item)
-                self.stations_table.setItem(i, 1, name_item)
-                self.stations_table.setItem(i, 2, path_item)
-
-                # Create action buttons for each station row
-                edit_btn = QPushButton("Edit")
-                delete_btn = QPushButton("Delete")
-
-                # Connect button signals
-                delete_btn.clicked.connect(lambda checked, item=id_item: self.remove_station(item))
-
-                actions_widget = QWidget()
-                actions_layout = QHBoxLayout(actions_widget)
-                actions_layout.addWidget(edit_btn)
-                actions_layout.addWidget(delete_btn)
-                actions_layout.setContentsMargins(0, 0, 0, 0)
-
-                self.stations_table.setCellWidget(i, 3, actions_widget)
+            # Use common display method to populate table
+            self.__display_stations(stations)
 
             self.__logger.info(f"Loaded {len(stations)} stations into table")
             self.statusbar.showMessage(f"{len(stations)} stations loaded successfully", 2000)
@@ -361,6 +381,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception as error:
             self.__logger.error(f"Failed to load stations table: {error}")
             self.statusbar.showMessage("Error loading stations. Check logs for details.", 5000)
+
+    def search_stations(self):
+        """
+        Search stations by name and display matching results in table.
+
+        Reads search term from input field and filters table to show
+        only matching stations. Shows all stations if search is empty.
+
+        :return: None
+        """
+        search_term = self.search_station_line.text().strip()
+
+        # Don't search if field is empty
+        if not search_term:
+            self.statusbar.showMessage("Please enter a station name to search", 2000)
+            return
+
+        try:
+            success, result = self.__manager.search_stations(search_term)
+
+            if not success:
+                self.__logger.warning(result)
+                self.statusbar.showMessage(result, 3000)
+                self.stations_table.setRowCount(0)  # Clear table
+                return
+
+            # Display search results
+            stations = result
+            self.__display_stations(stations)
+
+            self.__logger.info(f"Found {len(stations)} stations matching '{search_term}'")
+            self.statusbar.showMessage(f"Found {len(stations)} stations", 2000)
+
+        except Exception as error:
+            self.__logger.error(f"Error searching stations: {error}")
+            self.statusbar.showMessage("Error searching stations", 5000)
 
     def add_station(self):
         """

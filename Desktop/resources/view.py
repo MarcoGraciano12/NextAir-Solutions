@@ -240,10 +240,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_4.addWidget(self.line_8)
 
-        self.reload_stations_table_button = QPushButton(self.widget_9)
-        self.reload_stations_table_button.setObjectName(u"reload_stations_table_button")
+        self.refresh_stations_table_button = QPushButton(self.widget_9)
+        self.refresh_stations_table_button.setObjectName(u"refresh_stations_table_button")
 
-        self.horizontalLayout_4.addWidget(self.reload_stations_table_button)
+        self.horizontalLayout_4.addWidget(self.refresh_stations_table_button)
 
 
         self.verticalLayout_8.addWidget(self.widget_9)
@@ -423,7 +423,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(1)
-        self.menu_tab.setCurrentIndex(3)
+        self.menu_tab.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -443,7 +443,7 @@ class Ui_MainWindow(object):
         self.search_station_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STATION NAME HERE", None))
         self.search_station_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
         self.add_station_button.setText(QCoreApplication.translate("MainWindow", u"ADD STATION", None))
-        self.reload_stations_table_button.setText(QCoreApplication.translate("MainWindow", u"RELOAD TABLE", None))
+        self.refresh_stations_table_button.setText(QCoreApplication.translate("MainWindow", u"REFRESH TABLE", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.stations), QCoreApplication.translate("MainWindow", u"STATIONS", None))
         self.search_stream_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STREAM NAME HERE", None))
         self.search_stream_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
