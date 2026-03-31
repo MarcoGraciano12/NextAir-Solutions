@@ -10,7 +10,7 @@ from msilib import RadioButtonGroup
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QFormLayout, QWidget, QLineEdit, QPushButton, QLabel, QTableWidget, QTableWidgetItem,
-    QHBoxLayout, QMessageBox, QComboBox, QDialog, QDialogButtonBox, QHeaderView
+    QHBoxLayout, QMessageBox, QComboBox, QDialog, QDialogButtonBox, QHeaderView, QFileDialog
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QAction
@@ -21,7 +21,7 @@ from passlib.hash import pbkdf2_sha256
 from manager import Manager
 import logging
 from dialogs import AddStationDialog, AddStreamDialog
-
+import csv
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
@@ -54,8 +54,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.login_button.pressed.connect(self.login)
         self.logout_button.pressed.connect(self.logout)
 
-        self.theme_combo.currentIndexChanged.connect(self.change_theme)
-
         # ==============================================================================================================
         # STATION ACTIONS
         # ==============================================================================================================
@@ -72,7 +70,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ==============================================================================================================
         # Connect add stream button
         self.add_stream_button.pressed.connect(self.add_stream)
-
+        # Connect refresh button to reload all streams
+        self.refresh_streams_table_button.clicked.connect(self.__load_streams_table)
+        # ==============================================================================================================
+        # SETTINGS ACTIONS
+        # ==============================================================================================================
+        self.theme_combo.currentIndexChanged.connect(self.change_theme)
+        self.import_stations_button.clicked.connect(self.extract_stations_file_data)
+        self.import_streams_button.clicked.connect(self.extract_streams_file_data)
+        self.export_stations_button.clicked.connect(self.export_stations_data)
+        self.export_streams_button.clicked.connect(self.export_streams_data)
 
     def login(self):
         self.stackedWidget.setCurrentIndex(1)
@@ -247,7 +254,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Name column: fixed width (user can resize manually)
         header.setSectionResizeMode(1, QHeaderView.Interactive)
-        self.stations_table.setColumnWidth(1, 120)
+        self.stations_table.setColumnWidth(1, 200)
 
         # Path column: stretches to fill all remaining space
         header.setSectionResizeMode(2, QHeaderView.Stretch)
@@ -273,7 +280,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if not stations:
                 self.__logger.warning("No stations found in database")
                 self.statusbar.showMessage("No stations available", 3000)
-                return
 
             # Populate combo (only if empty - first load)
             if self.stations_combo.count() == 0:
@@ -479,7 +485,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if not streams:
                 self.__logger.warning("No streams found in database")
                 self.statusbar.showMessage("No streams available", 3000)
-                return
 
             # Use common display method to populate table
             self.__display_streams(streams)
@@ -664,6 +669,175 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ==================================================================================================================
     # TRANSMISSION
     # ==================================================================================================================
+
+    # ==================================================================================================================
+    # SETTINGS ACTIONS
+    # ==================================================================================================================
+    def extract_stations_file_data(self) -> None:
+        """
+        Opens file explorer to select CSV file and processes station data.
+
+        :return: None
+        """
+        file_path, _ = QFileDialog.getOpenFileName( self,"Select stations CSV file","","CSV Files (*.csv)")
+
+        if not file_path:
+            self.__logger.warning("No file selected")
+            return
+
+        try:
+            with open(file_path, newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                stations = list(reader)
+
+            if not stations:
+                self.__logger.warning("CSV file is empty")
+                QMessageBox.warning(self, "Empty File", "The selected CSV file is empty")
+                return
+
+        except Exception as error:
+            self.__logger.error(f"Failed to read CSV: {error}")
+            QMessageBox.critical(self, "Read Error", f"Failed to read CSV file:\n{error}")
+            return
+
+        success, result = self.__manager.create_many_stations(stations)
+
+        if not success:
+            self.__logger.error(f"Errors creating stations: {result}")
+            error_msg = "\n".join(result)
+            QMessageBox.critical(self, "Creation Errors", f"Errors occurred:\n\n{error_msg}")
+            return
+
+        self.__logger.info("All stations created successfully")
+        QMessageBox.information(self, "Success", f"{len(stations)} stations loaded successfully")
+
+    def extract_streams_file_data(self) -> None:
+        """
+        Opens file explorer to select CSV file and processes stream data.
+
+        :return: None
+        """
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select streams CSV file", "","CSV Files (*.csv)")
+
+        if not file_path:
+            self.__logger.warning("No file selected")
+            return
+
+        self.__logger.info(f"File selected: {file_path}")
+
+        try:
+            with open(file_path, newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                streams = list(reader)
+
+            if not streams:
+                self.__logger.warning("CSV file is empty")
+                QMessageBox.warning(self, "Empty File", "The selected CSV file is empty")
+                return
+
+        except Exception as error:
+            self.__logger.error(f"Failed to read CSV: {error}")
+            QMessageBox.critical(self, "Read Error", f"Failed to read CSV file:\n{error}")
+            return
+
+        success, result = self.__manager.create_many_streams(streams)
+
+        if not success:
+            self.__logger.error(f"Errors creating streams: {result}")
+            error_msg = "\n".join(result)
+            QMessageBox.critical(self, "Creation Errors", f"Errors occurred:\n\n{error_msg}")
+            return
+
+        self.__logger.info("All streams created successfully")
+        QMessageBox.information(self, "Success", f"{len(streams)} streams loaded successfully")
+
+    def export_stations_data(self) -> None:
+        """
+        Exports all stations data to a CSV file.
+
+        :return: None
+        """
+        stations = self.__manager.get_all_stations()
+
+        if not stations:
+            self.__logger.warning("No stations to export")
+            QMessageBox.warning(self, "No Data", "No stations available to export")
+            return
+
+        file_path, _ = QFileDialog.getSaveFileName(self,"Export stations to CSV","stations.csv","CSV Files (*.csv)")
+
+        if not file_path:
+            self.__logger.warning("Export cancelled")
+            return
+
+        try:
+            stations_data = [station.to_dict() for station in stations]
+
+            with open(file_path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=stations_data[0].keys())
+                writer.writeheader()
+                writer.writerows(stations_data)
+
+            self.__logger.info(f"Stations exported to {file_path}")
+            QMessageBox.information(self, "Success", f"{len(stations)} stations exported successfully")
+
+        except Exception as error:
+            self.__logger.error(f"Failed to export stations: {error}")
+            QMessageBox.critical(self, "Export Error", f"Failed to export CSV:\n{error}")
+
+    def export_streams_data(self) -> None:
+        """
+        Exports all streams data to a CSV file including station names.
+
+        :return: None
+        """
+        stations = self.__manager.get_all_stations()
+
+        if not stations:
+            self.__logger.warning("No streams to export")
+            QMessageBox.warning(self, "No Data", "No streams available to export")
+            return
+
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export streams to CSV",
+            "streams.csv",
+            "CSV Files (*.csv)"
+        )
+
+        if not file_path:
+            self.__logger.warning("Export cancelled")
+            return
+
+        try:
+            stream_data = [
+                {
+                    'station_name': station.station_name,
+                    'stream_name': stream.stream_name,
+                    'external_id': stream.external_id,
+                    **stream.broadcast.to_dict()
+                }
+                for station in stations
+                for stream in station.streams
+            ]
+
+            if not stream_data:
+                self.__logger.warning("No streams to export")
+                QMessageBox.warning(self, "No Data", "No streams available to export")
+                return
+
+            with open(file_path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=stream_data[0].keys())
+                writer.writeheader()
+                writer.writerows(stream_data)
+
+            self.__logger.info(f"Streams exported to {file_path}")
+            QMessageBox.information(self, "Success", f"{len(stream_data)} streams exported successfully")
+
+        except Exception as error:
+            self.__logger.error(f"Failed to export streams: {error}")
+            QMessageBox.critical(self, "Export Error", f"Failed to export CSV:\n{error}")
+
 
 
 if __name__ == "__main__":

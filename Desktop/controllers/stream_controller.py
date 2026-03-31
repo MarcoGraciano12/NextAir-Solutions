@@ -63,6 +63,35 @@ class StreamController:
             self.__logger.error(f"Error creating stream: {e}")
             return False, "Error creating stream"
 
+    def create_stream(self, station_id: int, stream_name: str, external_id: int):
+        """
+        Create a new stream for a station.
+
+        :param station_id: Foreign key to Station
+        :param stream_name: Unique stream name
+        :param external_id: External system identifier
+        :return: Tuple (success: bool, result: Stream or error message)
+        """
+        try:
+            with Session(engine) as session:
+                # Check if stream name already exists
+                exists = session.query(Stream).filter_by(stream_name=stream_name).first()
+
+                if exists:
+                    return False, f"Stream already exists: {stream_name}"
+
+                stream = Stream(station_id=station_id, stream_name=stream_name, external_id=external_id)
+
+                session.add(stream)
+                session.commit()
+                session.refresh(stream)
+
+                return True, stream
+
+        except Exception as e:
+            self.__logger.error(f"Error creating stream: {e}")
+            return False, "Error creating stream"
+
     def get(self, stream_id: int):
         """
         Get stream by ID.

@@ -47,7 +47,7 @@ class Stream(Base):
         back_populates="stream",
         cascade="all, delete-orphan",
         uselist=False,  # One-to-one relationship
-        lazy=False  # Always eager load
+        lazy="joined"  # Always eager load
     )
 
     # One-to-many relationship: one stream has multiple playlist entries

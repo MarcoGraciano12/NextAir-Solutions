@@ -34,7 +34,7 @@ class Station(Base):
     files_path = Column(String(255), nullable=False)
 
     # One-to-many relationship: one station has multiple streams
-    streams: Mapped[List["Stream"]] = relationship(back_populates="station", lazy=True, cascade="all, delete-orphan")
+    streams: Mapped[List["Stream"]] = relationship(back_populates="station", lazy="selectin", cascade="all, delete-orphan")
 
     def to_dict(self):
         """

@@ -315,7 +315,7 @@
                  <enum>QTabWidget::TabShape::Rounded</enum>
                 </property>
                 <property name="currentIndex">
-                 <number>3</number>
+                 <number>5</number>
                 </property>
                 <property name="elideMode">
                  <enum>Qt::TextElideMode::ElideMiddle</enum>
@@ -673,9 +673,120 @@
                    </widget>
                   </item>
                   <item>
+                   <widget class="QWidget" name="widget_11" native="true">
+                    <layout class="QHBoxLayout" name="horizontalLayout_5">
+                     <item>
+                      <widget class="QLabel" name="label_7">
+                       <property name="text">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;LOAD STATIONS FILE:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_7">
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="import_stations_button">
+                       <property name="text">
+                        <string>IMPORT STATIONS</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="Line" name="line_13">
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="export_stations_button">
+                       <property name="text">
+                        <string>EXPORT STATIONS</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="Line" name="line_10">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="widget_12" native="true">
+                    <layout class="QHBoxLayout" name="horizontalLayout_6">
+                     <item>
+                      <widget class="QLabel" name="label_8">
+                       <property name="text">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;LOAD STREAMS FILE:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_8">
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="import_streams_button">
+                       <property name="text">
+                        <string>IMPORT STREAMS</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="Line" name="line_12">
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Vertical</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="export_streams_button">
+                       <property name="text">
+                        <string>EXPORT STATIONS</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="Line" name="line_11">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <spacer name="verticalSpacer_7">
                     <property name="orientation">
                      <enum>Qt::Orientation::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Policy::Expanding</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>

@@ -323,10 +323,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.line_5)
 
-        self.reload_streams_table_button = QPushButton(self.widget_7)
-        self.reload_streams_table_button.setObjectName(u"reload_streams_table_button")
+        self.refresh_streams_table_button = QPushButton(self.widget_7)
+        self.refresh_streams_table_button.setObjectName(u"refresh_streams_table_button")
 
-        self.horizontalLayout_3.addWidget(self.reload_streams_table_button)
+        self.horizontalLayout_3.addWidget(self.refresh_streams_table_button)
 
 
         self.verticalLayout_7.addWidget(self.widget_7)
@@ -405,6 +405,86 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_6.addWidget(self.line_2)
 
+        self.widget_11 = QWidget(self.SETTINGS)
+        self.widget_11.setObjectName(u"widget_11")
+        self.horizontalLayout_5 = QHBoxLayout(self.widget_11)
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.label_7 = QLabel(self.widget_11)
+        self.label_7.setObjectName(u"label_7")
+
+        self.horizontalLayout_5.addWidget(self.label_7)
+
+        self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_7)
+
+        self.import_stations_button = QPushButton(self.widget_11)
+        self.import_stations_button.setObjectName(u"import_stations_button")
+
+        self.horizontalLayout_5.addWidget(self.import_stations_button)
+
+        self.line_13 = QFrame(self.widget_11)
+        self.line_13.setObjectName(u"line_13")
+        self.line_13.setFrameShape(QFrame.Shape.VLine)
+        self.line_13.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_5.addWidget(self.line_13)
+
+        self.export_stations_button = QPushButton(self.widget_11)
+        self.export_stations_button.setObjectName(u"export_stations_button")
+
+        self.horizontalLayout_5.addWidget(self.export_stations_button)
+
+
+        self.verticalLayout_6.addWidget(self.widget_11)
+
+        self.line_10 = QFrame(self.SETTINGS)
+        self.line_10.setObjectName(u"line_10")
+        self.line_10.setFrameShape(QFrame.Shape.HLine)
+        self.line_10.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.verticalLayout_6.addWidget(self.line_10)
+
+        self.widget_12 = QWidget(self.SETTINGS)
+        self.widget_12.setObjectName(u"widget_12")
+        self.horizontalLayout_6 = QHBoxLayout(self.widget_12)
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.label_8 = QLabel(self.widget_12)
+        self.label_8.setObjectName(u"label_8")
+
+        self.horizontalLayout_6.addWidget(self.label_8)
+
+        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_6.addItem(self.horizontalSpacer_8)
+
+        self.import_streams_button = QPushButton(self.widget_12)
+        self.import_streams_button.setObjectName(u"import_streams_button")
+
+        self.horizontalLayout_6.addWidget(self.import_streams_button)
+
+        self.line_12 = QFrame(self.widget_12)
+        self.line_12.setObjectName(u"line_12")
+        self.line_12.setFrameShape(QFrame.Shape.VLine)
+        self.line_12.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_6.addWidget(self.line_12)
+
+        self.export_streams_button = QPushButton(self.widget_12)
+        self.export_streams_button.setObjectName(u"export_streams_button")
+
+        self.horizontalLayout_6.addWidget(self.export_streams_button)
+
+
+        self.verticalLayout_6.addWidget(self.widget_12)
+
+        self.line_11 = QFrame(self.SETTINGS)
+        self.line_11.setObjectName(u"line_11")
+        self.line_11.setFrameShape(QFrame.Shape.HLine)
+        self.line_11.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.verticalLayout_6.addWidget(self.line_11)
+
         self.verticalSpacer_7 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_6.addItem(self.verticalSpacer_7)
@@ -435,7 +515,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(1)
-        self.menu_tab.setCurrentIndex(3)
+        self.menu_tab.setCurrentIndex(5)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -452,7 +532,7 @@ class Ui_MainWindow(object):
         self.logout_button.setText(QCoreApplication.translate("MainWindow", u"LOGOUT", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.users), QCoreApplication.translate("MainWindow", u"USERS", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.INPUTS), QCoreApplication.translate("MainWindow", u"INPUTS", None))
-        self.search_station_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STATION NAME HERE", None))
+        self.search_station_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STATION NAME", None))
         self.search_station_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
         self.add_station_button.setText(QCoreApplication.translate("MainWindow", u"ADD STATION", None))
         self.refresh_stations_table_button.setText(QCoreApplication.translate("MainWindow", u"REFRESH TABLE", None))
@@ -461,7 +541,7 @@ class Ui_MainWindow(object):
         self.search_stream_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STREAM NAME", None))
         self.search_stream_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
         self.add_stream_button.setText(QCoreApplication.translate("MainWindow", u"ADD STREAM", None))
-        self.reload_streams_table_button.setText(QCoreApplication.translate("MainWindow", u"RELOAD TABLE", None))
+        self.refresh_streams_table_button.setText(QCoreApplication.translate("MainWindow", u"REFRESH TABLE", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.streams), QCoreApplication.translate("MainWindow", u"STREAMS", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.transmissions), QCoreApplication.translate("MainWindow", u"TRANSMISSION", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\">SELECT APP THEME: </p></body></html>", None))
@@ -485,6 +565,12 @@ class Ui_MainWindow(object):
         self.theme_combo.setItemText(17, QCoreApplication.translate("MainWindow", u"dark_teal.xml", None))
         self.theme_combo.setItemText(18, QCoreApplication.translate("MainWindow", u"dark_yellow.xml", None))
 
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>LOAD STATIONS FILE:</p></body></html>", None))
+        self.import_stations_button.setText(QCoreApplication.translate("MainWindow", u"IMPORT STATIONS", None))
+        self.export_stations_button.setText(QCoreApplication.translate("MainWindow", u"EXPORT STATIONS", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>LOAD STREAMS FILE:</p></body></html>", None))
+        self.import_streams_button.setText(QCoreApplication.translate("MainWindow", u"IMPORT STREAMS", None))
+        self.export_streams_button.setText(QCoreApplication.translate("MainWindow", u"EXPORT STATIONS", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.SETTINGS), QCoreApplication.translate("MainWindow", u"SETTINGS", None))
     # retranslateUi
 

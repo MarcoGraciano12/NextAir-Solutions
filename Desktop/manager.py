@@ -116,6 +116,29 @@ class Manager:
         """
         return self.__stations.search_by_name(search_term)
 
+    def create_many_stations(self, stations: list) -> tuple:
+        """
+        Creates multiple stations from a list of dictionaries.
+
+        :param stations: List of dictionaries with station data
+        :return: Tuple (success: bool, errors: list or None)
+        """
+        errors = []
+
+        for station in stations:
+            success, msg = self.__stations.create(
+                station_name=station['station_name'],
+                files_path=station['files_path']
+            )
+
+            if not success:
+                errors.append(msg)
+
+        if errors:
+            return False, errors
+
+        return True, None
+
     # ==================================================================================================================
     # STREAMS
     # ==================================================================================================================
@@ -156,6 +179,54 @@ class Manager:
 
     def get_streams_by_station(self, station_id: int):
         return self.__streams.get_by_station(station_id=station_id)
+
+    def create_many_streams(self, streams: list) -> tuple:
+        """
+        Creates multiple streams with their broadcasts from a list of dictionaries.
+
+        :param streams: List of dictionaries with stream and broadcast data
+        :return: Tuple (success: bool, errors: list or None)
+        """
+        errors = []
+
+        for stream in streams:
+            # Get station
+            success, station = self.__stations.get_by_name(stream['station_name'])
+            if not success:
+                errors.append(station)
+                continue
+
+            # Create stream
+            success, stream_model = self.__streams.create_stream(
+                station_id=station.station_id,
+                stream_name=stream['stream_name'],
+                external_id=stream['external_id']
+            )
+            if not success:
+                errors.append(stream_model)
+                continue
+
+            # Create broadcast
+            success, msg = self.__broadcast.create(
+                stream_id=stream_model.stream_id,
+                name=stream['stream_name'],
+                url=stream['url'],
+                user=stream['user'],
+                password=stream['password'],
+                channels=stream['channels'],
+                sample_rate=stream['sample_rate'],
+                block_size=stream['block_size'],
+                bitrate=stream['bitrate']
+            )
+            if not success:
+                errors.append(msg)
+                continue
+
+        if errors:
+            return False, errors
+
+        return True, None
+
     # ==================================================================================================================
     # BROADCAST
     # ==================================================================================================================

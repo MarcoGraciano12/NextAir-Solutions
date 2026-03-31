@@ -10,7 +10,7 @@ Initializes the SQLAlchemy engine and declarative base for ORM models.
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
-from os import getenv
+from os import getenv, makedirs
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -24,7 +24,9 @@ DB_PORT = getenv("DB_PORT")
 DB_NAME = getenv("DB_NAME")
 
 # Build PostgreSQL connection URL
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+makedirs("instance", exist_ok=True)
+DATABASE_URL = "sqlite:///instance/database.db"
 
 # Create engine with connection pool settings
 engine = create_engine(
