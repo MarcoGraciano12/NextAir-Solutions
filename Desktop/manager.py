@@ -227,6 +227,15 @@ class Manager:
 
         return True, None
 
+    def search_streams(self, search_term: str):
+        """
+        Search streams by name with partial matching.
+
+        :param search_term: Texto to search in stream names
+        :return: Tuple (success: bool, stations: list or error_message: str)
+        """
+        return self.__streams.search_by_name(search_term)
+
     # ==================================================================================================================
     # BROADCAST
     # ==================================================================================================================

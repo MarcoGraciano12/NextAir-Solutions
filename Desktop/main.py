@@ -72,6 +72,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.add_stream_button.pressed.connect(self.add_stream)
         # Connect refresh button to reload all streams
         self.refresh_streams_table_button.clicked.connect(self.__load_streams_table)
+        # Connect search button
+        self.search_stream_button.clicked.connect(self.search_streams)
+        # Search when pressing enter the line edit
+        self.search_stream_line.returnPressed.connect(self.search_streams)
+        self.stations_combo.activated.connect(self.__on_stations_combo_selected)
         # ==============================================================================================================
         # SETTINGS ACTIONS
         # ==============================================================================================================
@@ -407,6 +412,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ==================================================================================================================
     # STREAMS
     # ==================================================================================================================
+    def __on_stations_combo_selected(self, index: int) -> None:
+        """
+        Handles combo selection by user click.
+
+        :param index: Selected item index
+        :return: None
+        """
+        station_id = self.stations_combo.currentData()
+        station_name = self.stations_combo.currentText()
+
+        self.__logger.info(f"Selected station_id: {station_id}, name: {station_name}")
+
+        success, result = self.__manager.get_streams_by_station(station_id)
+
+        if not success:
+            self.__logger.warning(result)
+            self.statusbar.showMessage(result, 3000)
+            self.streams_table.setRowCount(0)  # Clear table
+            return
+
+        # Display search results
+        self.__display_streams(result)
+
+        self.__logger.info(f"Found {len(result)} streams in '{station_name}'")
+        self.statusbar.showMessage(f"Found {len(result)} streams in {station_name}", 2000)
+
     def __create_stream_row(self, row: int, stream):
         """
         Create and populate a single stream row in the table.
@@ -665,6 +696,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception as error:
             self.__logger.error(f"Error removing stream: {error}")
             self.statusbar.showMessage("Unexpected error deleting stream", 5000)
+
+    def search_streams(self):
+        """
+        Search streams by name and display matching results in table.
+
+        Read search term from intput field and filters table to show
+        only matching streams. Shows all streams if search is empty.
+
+        :return: None
+        """
+        search_term = self.search_stream_line.text().strip()
+
+        # Don't search if field is empty
+        if not search_term:
+            self.statusbar.showMessage("Please enter a stream name to search", 2000)
+            return
+
+        try:
+            success, result = self.__manager.search_streams(search_term)
+
+            if not success:
+                self.__logger.warning(result)
+                self.statusbar.showMessage(result, 3000)
+                self.streams_table.setRowCount(0)  # Clear table
+                return
+
+            # Display search results
+            streams = result
+            self.__display_streams(streams)
+
+            self.__logger.info(f"Found {len(streams)} streams matching '{search_term}'")
+            self.statusbar.showMessage(f"Found {len(streams)} streams", 2000)
+
+        except Exception as error:
+            self.__logger.exception(f"Error searching streams: {error}")
+            self.statusbar.showMessage("Error searching streams", 5000)
 
     # ==================================================================================================================
     # TRANSMISSION

@@ -163,6 +163,27 @@ class StreamController:
             self.__logger.error(f"Error searching stream: {e}")
             return False, "Error searching stream"
 
+    def search_by_name(self, search_term: str):
+        """
+        Search streams by name using partial matching.
+
+        :param search_term: Text to search in stream names (case-insensitive)
+        :return: Tuple (success: bool, streams: list[Stream] or error message)
+        """
+        try:
+            with Session(engine) as session:
+                # Use ilike for case-insensitive partial matching
+                streams = session.query(Stream).filter(Stream.stream_name.ilike(f"%{search_term}%")).all()
+
+                if not streams:
+                    return False, f"No streams found matching: {search_term}"
+
+                return True, streams
+
+        except Exception as e:
+            self.__logger.error(f"Error searching streams: {e}")
+            return False, "Error searching streams"
+
     def update(self, stream_id: int, **kwargs):
         """
         Update stream attributes.
