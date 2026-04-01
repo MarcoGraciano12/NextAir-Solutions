@@ -60,7 +60,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ==============================================================================================================
         # DEVICE INPUTS ACTIONS
         # ==============================================================================================================
+        # Connect add device input button
         self.add_device_button.clicked.connect(self.add_device_input)
+        # Connect refresh button to reload all device inputs
+        self.refresh_device_table.clicked.connect(self.__load_device_inputs_table)
         # ==============================================================================================================
         # STATION ACTIONS
         # ==============================================================================================================
@@ -210,36 +213,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         :return: None
         """
         # Create centered items for all columns
-        id_item = QTableWidgetItem(str(device_input.id))
-        id_item.setTextAlignment(Qt.AlignCenter)
+        self.__set_centered_item(self.device_table, row, 0, device_input.id)
 
-        name_item = QTableWidgetItem(device_input.name)
-        name_item.setTextAlignment(Qt.AlignCenter)
+        self.__set_centered_item(self.device_table, row, 1, device_input.name)
 
-        device_name_item = QTableWidgetItem(device_input.device_name)
-        device_name_item.setTextAlignment(Qt.AlignCenter)
+        self.__set_centered_item(self.device_table, row, 2, device_input.device_name)
 
-        sample_rate_item = QTableWidgetItem(str(device_input.sample_rate))
-        sample_rate_item.setTextAlignment(Qt.AlignCenter)
+        self.__set_centered_item(self.device_table, row, 3, device_input.sample_rate)
 
-        gpi_item = QTableWidgetItem(str(device_input.gpi))
-        gpi_item.setTextAlignment(Qt.AlignCenter)
+        if device_input.gpi:
+            self.__set_centered_item(self.device_table, row, 4, device_input.gpi)
+        else:
+            self.__set_centered_item(self.device_table, row, 4, "-")
 
-        gpo_item = QTableWidgetItem(str(device_input.gpo))
-        gpo_item.setTextAlignment(Qt.AlignCenter)
+        if device_input.gpo:
+            self.__set_centered_item(self.device_table, row, 5, device_input.gpo)
+        else:
+            self.__set_centered_item(self.device_table, row, 5, "-")
 
-        self.device_table.setItem(row, 0, id_item)
-        self.device_table.setItem(row, 1, name_item)
-        self.device_table.setItem(row, 2, device_name_item)
-        self.device_table.setItem(row, 3, sample_rate_item)
-        self.device_table.setItem(row, 4, gpi_item)
-        self.device_table.setItem(row, 5, gpo_item)
+        # Get reference for delete button
+        name_item = self.device_table.item(row, 1)
 
         # Create action buttons for the row
         edit_btn = QPushButton("Edit")
         delete_btn = QPushButton("Delete")
 
         # Connect delete button with item reference
+        delete_btn.clicked.connect(lambda checked, item=name_item: self.remove_device_input(item))
 
         actions_widget = QWidget()
         actions_layout = QHBoxLayout(actions_widget)
@@ -340,6 +340,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             except Exception as error:
                 self.__logger.error(F"Error creating device input: {error}")
                 self.statusbar.showMessage("Unexpected error creating device input")
+
+    def remove_device_input(self, name_item: QTableWidgetItem):
+        """
+        Remove a device input from database and table UI.
+
+        :param name_item: QTableWidgetItem reference from the name column
+        :return: None
+        """
+        try:
+            # Get current row index form de imte reference
+            row = self.device_table.row(name_item)
+            name = name_item.text()
+
+            # Ask for confirmation before deleting
+            if not self.__confirm_deletion(name, "device input"):
+                return
+
+            success, msg = self.__manager.delete_device_input(name)
+
+            if not success:
+                self.statusbar.showMessage(f"Error: {msg}", 5000)
+                return
+
+            # Remove row using current index (works even if previous rows were deleted)
+            self.device_table.removeRow(row)
+
+            self.statusbar.showMessage("Device input deleted successfully", 2000)
+
+        except Exception as error:
+            self.__logger.error(f"Error removing device input: {error}")
+            self.statusbar.showMessage("Unexpected error deleting device input", 5000)
 
     # ==================================================================================================================
     # USERS
@@ -669,7 +700,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__set_centered_item(self.streams_table, row, 6, stream.broadcast.block_size)
             self.__set_centered_item(self.streams_table, row, 7, stream.broadcast.bitrate)
 
-        # Get external_id item reference for delete button
+        # Get reference for delete button
         stream_item = self.streams_table.item(row, 1)
 
         # Create action buttons

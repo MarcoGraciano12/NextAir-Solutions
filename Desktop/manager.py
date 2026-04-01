@@ -100,14 +100,14 @@ class Manager:
         """
         return self.__device_inputs.update(**kwargs)
 
-    def delete_device_input(self, device_input_id: int):
+    def delete_device_input(self, name: str):
         """
-        Deletes an audio input device by ID.
+        Deletes an audio input device by name.
 
-        :param device_input_id: ID of the device to delete
+        :param name: ID of the device to delete
         :return: Tuple (success: bool, message: str)
         """
-        return self.__device_inputs.delete(device_input_id=device_input_id)
+        return self.__device_inputs.delete(name=name)
 
     def retrieve_all_device_input(self):
         """

@@ -67,20 +67,20 @@ class DeviceInputController:
             self.__logger.error(f"Error creating device input: {error}")
             return False, "Error creating device input"
 
-    def delete(self, device_input_id: int):
+    def delete(self, name: str):
         """
-        Deletes an audio input device by ID.
+        Deletes an audio input device by name.
 
-        :param device_input_id: ID of the device to delete
+        :param name: ID of the device to delete
         :return: Tuple (success: bool, message: str)
         """
         try:
             with Session(engine) as session:
                 # Check if device input exists
-                device_input = session.query(DeviceInput).filter_by(id=device_input_id).first()
+                device_input = session.query(DeviceInput).filter_by(name=name).first()
 
                 if not device_input:
-                    return False, f"Device Input not found: {device_input_id}"
+                    return False, f"Device Input not found: {name}"
 
                 session.delete(device_input)
                 session.commit()
