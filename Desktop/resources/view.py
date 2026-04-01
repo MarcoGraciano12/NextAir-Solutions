@@ -196,6 +196,88 @@ class Ui_MainWindow(object):
         self.menu_tab.addTab(self.users, "")
         self.INPUTS = QWidget()
         self.INPUTS.setObjectName(u"INPUTS")
+        self.gridLayout_7 = QGridLayout(self.INPUTS)
+        self.gridLayout_7.setObjectName(u"gridLayout_7")
+        self.tabWidget = QTabWidget(self.INPUTS)
+        self.tabWidget.setObjectName(u"tabWidget")
+        self.DEVICEINPUTS = QWidget()
+        self.DEVICEINPUTS.setObjectName(u"DEVICEINPUTS")
+        self.verticalLayout_9 = QVBoxLayout(self.DEVICEINPUTS)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.widget_13 = QWidget(self.DEVICEINPUTS)
+        self.widget_13.setObjectName(u"widget_13")
+        self.widget_13.setMaximumSize(QSize(16777215, 100))
+        self.horizontalLayout_7 = QHBoxLayout(self.widget_13)
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_7.addItem(self.horizontalSpacer_9)
+
+        self.search_device_line = QLineEdit(self.widget_13)
+        self.search_device_line.setObjectName(u"search_device_line")
+        self.search_device_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_7.addWidget(self.search_device_line)
+
+        self.search_device_button = QPushButton(self.widget_13)
+        self.search_device_button.setObjectName(u"search_device_button")
+
+        self.horizontalLayout_7.addWidget(self.search_device_button)
+
+        self.line_15 = QFrame(self.widget_13)
+        self.line_15.setObjectName(u"line_15")
+        self.line_15.setFrameShape(QFrame.Shape.VLine)
+        self.line_15.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_7.addWidget(self.line_15)
+
+        self.add_device_button = QPushButton(self.widget_13)
+        self.add_device_button.setObjectName(u"add_device_button")
+
+        self.horizontalLayout_7.addWidget(self.add_device_button)
+
+        self.line_16 = QFrame(self.widget_13)
+        self.line_16.setObjectName(u"line_16")
+        self.line_16.setFrameShape(QFrame.Shape.VLine)
+        self.line_16.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_7.addWidget(self.line_16)
+
+        self.refresh_device_table = QPushButton(self.widget_13)
+        self.refresh_device_table.setObjectName(u"refresh_device_table")
+
+        self.horizontalLayout_7.addWidget(self.refresh_device_table)
+
+
+        self.verticalLayout_9.addWidget(self.widget_13)
+
+        self.line_14 = QFrame(self.DEVICEINPUTS)
+        self.line_14.setObjectName(u"line_14")
+        self.line_14.setFrameShape(QFrame.Shape.HLine)
+        self.line_14.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.verticalLayout_9.addWidget(self.line_14)
+
+        self.widget_14 = QWidget(self.DEVICEINPUTS)
+        self.widget_14.setObjectName(u"widget_14")
+        self.gridLayout_8 = QGridLayout(self.widget_14)
+        self.gridLayout_8.setObjectName(u"gridLayout_8")
+        self.gridLayout_8.setContentsMargins(0, -1, 0, -1)
+        self.device_table = QTableWidget(self.widget_14)
+        self.device_table.setObjectName(u"device_table")
+
+        self.gridLayout_8.addWidget(self.device_table, 0, 0, 1, 1)
+
+
+        self.verticalLayout_9.addWidget(self.widget_14)
+
+        self.tabWidget.addTab(self.DEVICEINPUTS, "")
+        self.tab_2 = QWidget()
+        self.tab_2.setObjectName(u"tab_2")
+        self.tabWidget.addTab(self.tab_2, "")
+
+        self.gridLayout_7.addWidget(self.tabWidget, 0, 0, 1, 1)
+
         self.menu_tab.addTab(self.INPUTS, "")
         self.stations = QWidget()
         self.stations.setObjectName(u"stations")
@@ -515,7 +597,8 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(1)
-        self.menu_tab.setCurrentIndex(5)
+        self.menu_tab.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -531,6 +614,12 @@ class Ui_MainWindow(object):
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:24pt;\">MENU</span></p></body></html>", None))
         self.logout_button.setText(QCoreApplication.translate("MainWindow", u"LOGOUT", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.users), QCoreApplication.translate("MainWindow", u"USERS", None))
+        self.search_device_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"NAME", None))
+        self.search_device_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
+        self.add_device_button.setText(QCoreApplication.translate("MainWindow", u"ADD INPUT", None))
+        self.refresh_device_table.setText(QCoreApplication.translate("MainWindow", u"REFRESH TABLE", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.DEVICEINPUTS), QCoreApplication.translate("MainWindow", u"DEVICE INPUTS", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"STREAM INPUTS", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.INPUTS), QCoreApplication.translate("MainWindow", u"INPUTS", None))
         self.search_station_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u"STATION NAME", None))
         self.search_station_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))

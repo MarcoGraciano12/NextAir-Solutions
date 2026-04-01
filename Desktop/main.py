@@ -45,6 +45,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.__manager = Manager()
 
         # Setup Tables
+        self.__setup_device_table()
+
+
         self.__setup_stations_table()
         self.__load_stations_table()
 
@@ -53,6 +56,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.login_button.pressed.connect(self.login)
         self.logout_button.pressed.connect(self.logout)
+
+        # ==============================================================================================================
+        # DEVICE INPUTS ACTIONS
+        # ==============================================================================================================
 
         # ==============================================================================================================
         # STATION ACTIONS
@@ -136,6 +143,62 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         item = QTableWidgetItem(str(text))
         item.setTextAlignment(Qt.AlignCenter)
         table.setItem(row, col, item)
+
+    # ==================================================================================================================
+    # DEVICE INPUTS
+    # ==================================================================================================================
+    def __setup_device_table(self):
+        """
+        Configure the devices table widget with columns and display settings.
+
+        Sets up column headers, disables editing, enables row selection,
+        and configures column widths.
+
+        :return: None
+        """
+        columns = ["ID", "NAME", "DEVICE NAME", "SAMPLERATE", "GPI", "GPO", "ACTIONS"]
+
+        self.device_table.setColumnCount(len(columns))
+        self.device_table.setHorizontalHeaderLabels(columns)
+
+        # Prevent direct cell editing - use Edit button instead
+        self.device_table.setEditTriggers(QTableWidget.NoEditTriggers)
+
+        # Select entire row when clicking any cell
+        self.device_table.setSelectionBehavior(QTableWidget.SelectRows)
+
+        # Configure column widths
+        header = self.device_table.horizontalHeader()
+
+        # ID column: small fixed width for numeric values
+        header.setSectionResizeMode(0, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(0, 60)
+
+        # Name column: stretches to fill all remaining space
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+
+        # Device Name column: stretches to fill all remaining space
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+
+        # Samplerate column: small fixed width for numeric values
+        header.setSectionResizeMode(3, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(3, 140)
+
+        # GPI column: small fixed width for numeric values
+        header.setSectionResizeMode(4, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(4, 90)
+
+        # GPO column: small fixed width for numeric values
+        header.setSectionResizeMode(5, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(5, 90)
+
+        # Actions column: fixed width to fit Edit/Delete buttons
+        header.setSectionResizeMode(6, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(6, 180)
+
+        self.device_table.verticalHeader().setDefaultSectionSize(40)
+
+
 
     # ==================================================================================================================
     # USERS

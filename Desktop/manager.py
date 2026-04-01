@@ -13,6 +13,7 @@ class Manager:
         self.__logger = logger or getLogger(self.__class__.__name__)
 
         self.__stream_inputs = StreamInputController()
+        self.__device_inputs = DeviceInputController()
         self.__subjects = SubjectsController()
 
         self.__stations = StationController()
@@ -68,6 +69,71 @@ class Manager:
 
     def get_stream_inputs(self):
         return self.__stream_inputs.get_all()
+
+    # ==================================================================================================================
+    # DEVICE INPUT
+    # ==================================================================================================================
+    def create(self, **kwargs):
+        """
+        Creates a new audio input device.
+
+        :param kwargs: Device fields (name, device_name, sample_rate, gpi, gpio)
+        :return: Tuple (success: bool, result: DeviceInput or error message)
+        """
+        return self.__device_inputs.create(**kwargs)
+
+    def retrieve(self, device_input_id: int):
+        """
+        Retrieves a single device input by ID.
+
+        :param device_input_id: ID of the device to retrieve
+        :return: Tuple (success: bool, result: DeviceInput or error message)
+        """
+        return self.__device_inputs.get(device_input_id=device_input_id)
+
+    def update(self, **kwargs):
+        """
+        Updates an existing audio input device.
+
+        :param kwargs: Fields to update including device_input_id
+        :return: Tuple (success: bool, result: DeviceInput or error message)
+        """
+        return self.__device_inputs.update(**kwargs)
+
+    def delete(self, device_input_id: int):
+        """
+        Deletes an audio input device by ID.
+
+        :param device_input_id: ID of the device to delete
+        :return: Tuple (success: bool, message: str)
+        """
+        return self.__device_inputs.delete(device_input_id=device_input_id)
+
+    def retrieve_all(self):
+        """
+        Retrieves all audio input devices.
+
+        :return: List of DeviceInput objects or empty list
+        """
+        return self.__device_inputs.get_all()
+
+    def retrieve_by_name(self, name: str):
+        """
+        Retrieves a device input by exact name match.
+
+        :param name: Exact name of the device
+        :return: Tuple (success: bool, result: DeviceInput or error message)
+        """
+        return self.__device_inputs.get_by_name(name=name)
+
+    def retrieve_by_search(self, name: str):
+        """
+        Searches device inputs by partial name match.
+
+        :param name: Search term for device name
+        :return: List of matching DeviceInput objects or empty list
+        """
+        return self.__device_inputs.search_by_name(search_term=name)
 
     # ==================================================================================================================
     # STATIONS

@@ -172,7 +172,6 @@ class StreamInputController:
                 if not stream_input:
                     return False, f"StreamInput not found: {stream_input_id}"
 
-                input_name = stream_input.name
                 session.delete(stream_input)
                 session.commit()
 

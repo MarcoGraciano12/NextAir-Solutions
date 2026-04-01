@@ -14,8 +14,9 @@ from .stream_input_controller import StreamInputController
 from .subjects_controller import SubjectsController
 from .playlist_controller import PlaylistController
 from .sources_controller import SourcesController
+from .device_input_controller import DeviceInputController
 
 __all__ = [
     "StationController", "StreamController", "TransmissionController", "BroadcastController", "StreamInputController",
-    "SubjectsController", "PlaylistController", "SourcesController"
+    "SubjectsController", "PlaylistController", "SourcesController", "DeviceInputController"
 ]

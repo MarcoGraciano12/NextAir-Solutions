@@ -13,5 +13,6 @@ from .broadcast import Broadcast
 from .stream_input import StreamInput
 from .playlist import Playlist
 from .sources import Sources
+from .device_inputs import DeviceInput
 
-__all__ = ["Station", "Stream", "Broadcast", "StreamInput", "Playlist", "Sources"]
+__all__ = ["Station", "Stream", "Broadcast", "StreamInput", "Playlist", "Sources", "DeviceInput"]
