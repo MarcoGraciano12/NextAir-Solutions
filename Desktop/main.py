@@ -6,14 +6,13 @@ Date: 2025-03-25
 """
 
 import sys
-from msilib import RadioButtonGroup
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QFormLayout, QWidget, QLineEdit, QPushButton, QLabel, QTableWidget, QTableWidgetItem,
     QHBoxLayout, QMessageBox, QComboBox, QDialog, QDialogButtonBox, QHeaderView, QFileDialog
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QAction
+from PySide6.QtGui import QIcon, QAction, QCloseEvent
 from resources.view import Ui_MainWindow
 from qt_material import apply_stylesheet
 from logging import Logger, getLogger
@@ -150,6 +149,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         item = QTableWidgetItem(str(text))
         item.setTextAlignment(Qt.AlignCenter)
         table.setItem(row, col, item)
+
+    def closeEvent(self, event: QCloseEvent):
+        """
+        Handle window close event with confirmation dialog.
+
+        :param event: Close event object
+        """
+        reply = QMessageBox.question(
+            self,
+            'Confirm Exit',
+            'Are you sure you want to close?',
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
     # ==================================================================================================================
     # DEVICE INPUTS
@@ -1177,8 +1195,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception as error:
             self.__logger.error(f"Failed to export streams: {error}")
             QMessageBox.critical(self, "Export Error", f"Failed to export CSV:\n{error}")
-
-
 
 if __name__ == "__main__":
     #  pyside6-uic mainwindow.ui -o mainwindow.py

@@ -1,7 +1,8 @@
+from PySide6.QtCore import Qt
 from logging import Logger, getLogger
+from PySide6.QtGui import QIntValidator
 from resources.add_stream import Ui_Dialog
 from PySide6.QtWidgets import QDialog, QMessageBox, QStyledItemDelegate
-from PySide6.QtCore import Qt
 
 
 class CenterDelegate(QStyledItemDelegate):
@@ -43,6 +44,10 @@ class AddStreamDialog(QDialog):
         if stations_data:
             for station_id, station_name in stations_data:
                 self.ui.stations_combo.addItem(station_name, station_id)
+
+        # Set validators for numeric inputs (1-100)
+        external_id_validator = QIntValidator(1, 100, self)
+        self.ui.external_id_line.setValidator(external_id_validator)
 
         # Set placeholder as selected by default
         self.ui.stations_combo.setCurrentIndex(0)
