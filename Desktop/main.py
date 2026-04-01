@@ -6,21 +6,21 @@ Date: 2025-03-25
 """
 
 import sys
-
-from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QFormLayout, QWidget, QLineEdit, QPushButton, QLabel, QTableWidget, QTableWidgetItem,
-    QHBoxLayout, QMessageBox, QComboBox, QDialog, QDialogButtonBox, QHeaderView, QFileDialog
-)
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QAction, QCloseEvent
-from resources.view import Ui_MainWindow
-from qt_material import apply_stylesheet
-from logging import Logger, getLogger
-from passlib.hash import pbkdf2_sha256
-from manager import Manager
-import logging
-from dialogs import AddStationDialog, AddStreamDialog, AddDeviceDialog
 import csv
+import logging
+from manager import Manager
+from PySide6.QtCore import Qt
+from PySide6.QtCore import QSettings
+from PySide6.QtGui import QCloseEvent
+from logging import Logger, getLogger
+from qt_material import apply_stylesheet
+from resources.view import Ui_MainWindow
+from dialogs import AddStationDialog, AddStreamDialog, AddDeviceDialog
+from PySide6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QPushButton, QTableWidget, QTableWidgetItem, QHBoxLayout, QMessageBox, QDialog,
+    QHeaderView, QFileDialog
+)
+
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
@@ -37,6 +37,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         super().__init__()
         self.setupUi(self)
+
+        # Settings instance for user preferences
+        self.__settings = QSettings('NextAir', 'NextAI-Cast')
+
+        # Load and apply saved theme
+        theme = self.__settings.value('theme', 'light_blue.xml')
+        apply_stylesheet(QApplication.instance(), theme)
 
         self.__logger = logger or getLogger(self.__class__.__name__)
 
@@ -111,9 +118,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         :return: None
         """
-        theme = self.theme_combo.currentText()
-        app = QApplication.instance()
-        apply_stylesheet(app, theme=theme)
+        theme_name = self.theme_combo.currentText()
+
+        # Apply new theme
+        apply_stylesheet(QApplication.instance(), theme_name)
+
+        # Save preference
+        self.__settings.setValue('theme', theme_name)
+
+        self.__logger.info(f"Theme changed to: {theme_name}")
 
     def __confirm_deletion(self, item_name: str, item_type: str = "item") -> bool:
         """
