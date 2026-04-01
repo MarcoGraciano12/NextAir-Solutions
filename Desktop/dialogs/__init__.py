@@ -1,2 +1,3 @@
 from .add_station_dialog import AddStationDialog
 from .add_stream_dialog import AddStreamDialog
+from .add_device_input_dialog import AddDeviceDialog

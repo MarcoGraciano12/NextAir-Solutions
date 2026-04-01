@@ -121,11 +121,11 @@ class DeviceInputController:
             with Session(engine) as session:
                 device_inputs = session.query(DeviceInput).all()
 
-                return True, device_inputs
+                return device_inputs
 
         except Exception as error:
             self.__logger.error(f"Error retrieving device inputs: {error}")
-            return False, "Error retrieving device inputs"
+            return None
 
     def get_by_name(self, name: str):
         """

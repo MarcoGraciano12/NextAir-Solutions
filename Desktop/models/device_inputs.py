@@ -32,7 +32,7 @@ class DeviceInput(Base):
     device_name = Column(String(255), unique=True, nullable=False)
     sample_rate = Column(Integer, nullable=False)
     gpi = Column(Integer, nullable=True)
-    gpio = Column(Integer, nullable=True)
+    gpo = Column(Integer, nullable=True)
 
 
     def to_dict(self) -> dict:

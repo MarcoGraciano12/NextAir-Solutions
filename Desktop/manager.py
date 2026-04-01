@@ -73,7 +73,7 @@ class Manager:
     # ==================================================================================================================
     # DEVICE INPUT
     # ==================================================================================================================
-    def create(self, **kwargs):
+    def create_device_input(self, **kwargs):
         """
         Creates a new audio input device.
 
@@ -82,7 +82,7 @@ class Manager:
         """
         return self.__device_inputs.create(**kwargs)
 
-    def retrieve(self, device_input_id: int):
+    def retrieve_device_input(self, device_input_id: int):
         """
         Retrieves a single device input by ID.
 
@@ -91,7 +91,7 @@ class Manager:
         """
         return self.__device_inputs.get(device_input_id=device_input_id)
 
-    def update(self, **kwargs):
+    def update_device_input(self, **kwargs):
         """
         Updates an existing audio input device.
 
@@ -100,7 +100,7 @@ class Manager:
         """
         return self.__device_inputs.update(**kwargs)
 
-    def delete(self, device_input_id: int):
+    def delete_device_input(self, device_input_id: int):
         """
         Deletes an audio input device by ID.
 
@@ -109,7 +109,7 @@ class Manager:
         """
         return self.__device_inputs.delete(device_input_id=device_input_id)
 
-    def retrieve_all(self):
+    def retrieve_all_device_input(self):
         """
         Retrieves all audio input devices.
 
@@ -117,7 +117,7 @@ class Manager:
         """
         return self.__device_inputs.get_all()
 
-    def retrieve_by_name(self, name: str):
+    def retrieve_device_input_by_name(self, name: str):
         """
         Retrieves a device input by exact name match.
 
@@ -126,7 +126,7 @@ class Manager:
         """
         return self.__device_inputs.get_by_name(name=name)
 
-    def retrieve_by_search(self, name: str):
+    def retrieve_device_input_by_search(self, name: str):
         """
         Searches device inputs by partial name match.
 

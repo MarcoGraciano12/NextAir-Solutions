@@ -20,7 +20,7 @@ from logging import Logger, getLogger
 from passlib.hash import pbkdf2_sha256
 from manager import Manager
 import logging
-from dialogs import AddStationDialog, AddStreamDialog
+from dialogs import AddStationDialog, AddStreamDialog, AddDeviceDialog
 import csv
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -46,7 +46,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Setup Tables
         self.__setup_device_table()
-
+        self.__load_device_inputs_table()
 
         self.__setup_stations_table()
         self.__load_stations_table()
@@ -60,7 +60,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ==============================================================================================================
         # DEVICE INPUTS ACTIONS
         # ==============================================================================================================
-
+        self.add_device_button.clicked.connect(self.add_device_input)
         # ==============================================================================================================
         # STATION ACTIONS
         # ==============================================================================================================
@@ -198,7 +198,148 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.device_table.verticalHeader().setDefaultSectionSize(40)
 
+    def __create_device_input_row(self, row: int, device_input):
+        """
+        Create and populate a single device input row in the table.
 
+        Sets up table items with centered text and action buttons for
+        the specified row index.
+
+        :param row: Table row index to populate
+        :param device_input: DeviceInput object with data to display
+        :return: None
+        """
+        # Create centered items for all columns
+        id_item = QTableWidgetItem(str(device_input.id))
+        id_item.setTextAlignment(Qt.AlignCenter)
+
+        name_item = QTableWidgetItem(device_input.name)
+        name_item.setTextAlignment(Qt.AlignCenter)
+
+        device_name_item = QTableWidgetItem(device_input.device_name)
+        device_name_item.setTextAlignment(Qt.AlignCenter)
+
+        sample_rate_item = QTableWidgetItem(str(device_input.sample_rate))
+        sample_rate_item.setTextAlignment(Qt.AlignCenter)
+
+        gpi_item = QTableWidgetItem(str(device_input.gpi))
+        gpi_item.setTextAlignment(Qt.AlignCenter)
+
+        gpo_item = QTableWidgetItem(str(device_input.gpo))
+        gpo_item.setTextAlignment(Qt.AlignCenter)
+
+        self.device_table.setItem(row, 0, id_item)
+        self.device_table.setItem(row, 1, name_item)
+        self.device_table.setItem(row, 2, device_name_item)
+        self.device_table.setItem(row, 3, sample_rate_item)
+        self.device_table.setItem(row, 4, gpi_item)
+        self.device_table.setItem(row, 5, gpo_item)
+
+        # Create action buttons for the row
+        edit_btn = QPushButton("Edit")
+        delete_btn = QPushButton("Delete")
+
+        # Connect delete button with item reference
+
+        actions_widget = QWidget()
+        actions_layout = QHBoxLayout(actions_widget)
+        actions_layout.addWidget(edit_btn)
+        actions_layout.addWidget(delete_btn)
+        actions_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.device_table.setCellWidget(row, 6, actions_widget)
+
+    def __add_device_input_to_table(self, device_input):
+        """
+        Add a single device input row to the table.
+
+        Creates a new row with device input data and action buttons (Edit/Delete).
+
+        :param device_input: DeviceInput object to add
+        :return: None
+        """
+        # Insert new row at the end
+        row = self.device_table.rowCount()
+        self.device_table.insertRow(row)
+
+        # Create row using common method
+        self.__create_device_input_row(row, device_input)
+
+    def __display_device_inputs(self, device_inputs: list):
+        """
+        Display a list of device inputs in the table.
+
+        Clears existing rows and populates table with provided device stations
+        including action buttons (Edit/Delete) for each row.
+
+        :param device_inputs: List of DeviceInput objects to display
+        :return: None
+        """
+        # Clear and prepare table
+        self.device_table.setRowCount(0)
+        self.device_table.setRowCount(len(device_inputs))
+
+        # Create each row using common method
+        for i, device_input in enumerate(device_inputs):
+            self.__create_device_input_row(i, device_input)
+
+    def __load_device_inputs_table(self):
+        """
+        Load and display all device inputs from database into the device inputs table widget.
+
+        Populates the table with device input data and creates action buttons (Edit/Delete)
+        for each row. Clears existing rows before loading new data.
+
+        :return: None
+        """
+        try:
+            device_inputs = self.__manager.retrieve_all_device_input()
+
+            if not device_inputs:
+                self.__logger.warning("No device inputs found in database")
+                self.statusbar.showMessage("No device inputs available", 3000)
+
+            # Use common display method to populate table
+            self.__display_device_inputs(device_inputs)
+
+            self.__logger.info(f"Loaded {len(device_inputs)} device inputs into table")
+            self.statusbar.showMessage(f"{len(device_inputs)} device inputs loaded successfully", 2000)
+
+        except Exception as error:
+            self.__logger.error(f"Failed to load device inputs table: {error}")
+            self.statusbar.showMessage("Error loading device inputs. Check logs for details.", 5000)
+
+    def add_device_input(self):
+        """
+        Show dialog to add a new device input and save to database.
+
+        Opens the add device input dialog, validates input, creates the device input
+        in database, and adds it to the table if successful.
+
+        :return: None
+        """
+        dialog = AddDeviceDialog(self, self.__logger)
+
+        if dialog.exec() == QDialog.Accepted:
+            try:
+                data = dialog.get_device_data()
+
+                # Create device input in database
+                success, result = self.__manager.create_device_input(**data)
+
+                # Check if creation failed
+                if not success:
+                    self.statusbar.showMessage(f"Error: {result}", 5000)
+                    return
+
+                # Add only the new row to table
+                self.__add_device_input_to_table(result)
+
+                self.statusbar.showMessage("Device Input created successfully", 2000)
+
+            except Exception as error:
+                self.__logger.error(F"Error creating device input: {error}")
+                self.statusbar.showMessage("Unexpected error creating device input")
 
     # ==================================================================================================================
     # USERS
