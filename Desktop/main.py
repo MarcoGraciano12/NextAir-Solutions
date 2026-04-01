@@ -64,6 +64,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.add_device_button.clicked.connect(self.add_device_input)
         # Connect refresh button to reload all device inputs
         self.refresh_device_table.clicked.connect(self.__load_device_inputs_table)
+        # Connect search button
+        self.search_device_button.clicked.connect(self.search_device_inputs)
+        # Search when pressing enter the line edit
+        self.search_device_line.returnPressed.connect(self.search_device_inputs)
         # ==============================================================================================================
         # STATION ACTIONS
         # ==============================================================================================================
@@ -372,6 +376,41 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.__logger.error(f"Error removing device input: {error}")
             self.statusbar.showMessage("Unexpected error deleting device input", 5000)
 
+    def search_device_inputs(self):
+        """
+        Search device input by name nd display matching results in table.
+
+        Reads search term form input filed and filters table to show
+        only matching device inputs. Show all device inputs if search is empty.
+
+        :return: None
+        """
+        search_term = self.search_device_line.text().strip()
+
+        # Don't search if field is empty
+        if not search_term:
+            self.statusbar.showMessage("Please enter a name to search", 2000)
+            return
+
+        try:
+            success, result = self.__manager.retrieve_device_input_by_search(search_term)
+
+            if not success:
+                self.__logger.warning(result)
+                self.statusbar.showMessage(result, 3000)
+                self.device_table.setRowCount(0) # Clear table
+                return
+
+            # Display search results
+            self.__display_device_inputs(result)
+
+            self.__logger.info(f"Found {len(result)} device inputs matching '{search_term}'")
+            self.statusbar.showMessage(f"Found {len(result)} device inputs", 2000)
+
+        except Exception as error:
+            self.__logger.error(f"Error searching device input: {error}")
+            self.statusbar.showMessage("Error searching device input", 5000)
+
     # ==================================================================================================================
     # USERS
     # ==================================================================================================================
@@ -493,8 +532,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.stations_table.setColumnWidth(0, 60)
 
         # Name column: fixed width (user can resize manually)
-        header.setSectionResizeMode(1, QHeaderView.Interactive)
-        self.stations_table.setColumnWidth(1, 200)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
 
         # Path column: stretches to fill all remaining space
         header.setSectionResizeMode(2, QHeaderView.Stretch)
