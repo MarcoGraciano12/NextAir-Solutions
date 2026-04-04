@@ -10,6 +10,8 @@ Date: March 17, 2026
 """
 
 import time
+from email.feedparser import NeedMoreData
+
 from .observer import Observer
 from logging import Logger, getLogger
 from threading import Thread, Lock, Event
@@ -20,10 +22,11 @@ class StreamObserver(Observer):
     Observer that transmits encoded audio data to broadcast server.
     """
 
-    def __init__(self, encoder, broadcast, reload_interval: int = 5, logger: Logger = None):
+    def __init__(self, name: str, encoder = None, broadcast = None, reload_interval: int = 5, logger: Logger = None):
         """
         Initialize stream observer.
 
+        :param name: Identifier for this observer instance
         :param encoder: Audio encoder instance
         :param broadcast: broadcast transmitter instance
         :param reload_interval: Seconds between encoder health checks
@@ -36,12 +39,60 @@ class StreamObserver(Observer):
         # Reload monitoring interval
         self.__reload_interval = reload_interval
 
-        # Logger instance for tracking operations
-        self.__logger = logger or getLogger(self.__class__.__name__)
-
         # Thread control attributes
         self.__thread, self.__reload_thread = None, None
         self.__stop_stream, self.__lock = Event(), Lock()
+
+        # Logger instance for tracking operations
+        self.__name = name or self.__class__.__name__
+        self.__logger = logger or getLogger(self.__name)
+
+    @property
+    def name(self) -> str:
+        """
+        Get observer instance name.
+        """
+        return self.__name
+
+    @property
+    def encoder(self):
+        """
+        Get encoder instance
+        :return: Encoder object
+        """
+        return self.__encoder
+
+    @encoder.setter
+    def encoder(self, value):
+        """
+        Set encoder instance
+        :param value: Encoder object
+        """
+        self.__encoder = value
+
+    @property
+    def broadcast(self):
+        """
+        Get broadcast instance
+        :return: Broadcast object
+        """
+        return self.__broadcast
+
+    @broadcast.setter
+    def broadcast(self, value):
+        """
+        Set broadcast instance
+        :param value: Broadcast object
+        """
+        self.__broadcast = value
+
+    @property
+    def logger(self):
+        """
+        Get logger instance
+        :return: Logger object
+        """
+        return self.__logger
 
     def update(self, frame):
         """

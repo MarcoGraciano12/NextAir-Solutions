@@ -107,15 +107,6 @@ class Icecast:
         """
         return not self.__stop_event.is_set()
 
-    def is_connected(self) -> bool:
-        """
-        Check if the Icecast connection is active.
-
-        :return: True when connection is active, else False.
-        """
-        with self.__lock:
-            return self.__connection is not None
-
     def __build_source_request(self, content_type: str) -> str:
         """
         Build HTTP SOURCE request with authentication headers.
