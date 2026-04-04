@@ -1212,7 +1212,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
     #  pyside6-uic mainwindow.ui -o mainwindow.py
     app = QApplication(sys.argv)
-    apply_stylesheet(app, "light_blue.xml")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
