@@ -9,9 +9,9 @@ Date: March 18, 2026
 
 import socket
 from base64 import b64encode
-from logging import Logger, getLogger
 from threading import Event, Lock
 from urllib.parse import urlparse
+from logging import Logger, getLogger
 
 
 class Icecast:

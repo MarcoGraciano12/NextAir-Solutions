@@ -1,5 +1,5 @@
 """
-Module: ogg.py
+Module: ogg_encoder.py
 
 FFmpeg subprocess wrapper for LPCM to OGG Opus encoding.
 
@@ -13,7 +13,7 @@ from threading import Event
 from logging import Logger, getLogger
 
 
-class OGG:
+class OGGEncoder:
     """
     Manages FFmpeg subprocess for real-time LPCM to OGG Opus encoding.
     """

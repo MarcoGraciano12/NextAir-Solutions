@@ -13,8 +13,8 @@ such as low-latency streaming workflows.
 """
 
 import sounddevice as sd
-from logging import Logger, getLogger
 from threading import Lock, Event
+from logging import Logger, getLogger
 
 
 class DeviceSubject:
