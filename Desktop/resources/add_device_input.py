@@ -24,7 +24,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(379, 409)
+        Dialog.resize(452, 444)
         self.gridLayout = QGridLayout(Dialog)
         self.gridLayout.setObjectName(u"gridLayout")
         self.frame = QFrame(Dialog)
@@ -88,27 +88,55 @@ class Ui_Dialog(object):
 
         self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.sample_rate_combo)
 
-        self.label_5 = QLabel(self.widget)
+        self.label_7 = QLabel(self.widget)
+        self.label_7.setObjectName(u"label_7")
+
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.label_7)
+
+        self.block_size_combo = QComboBox(self.widget)
+        self.block_size_combo.setObjectName(u"block_size_combo")
+
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.FieldRole, self.block_size_combo)
+
+        self.label_8 = QLabel(self.widget)
+        self.label_8.setObjectName(u"label_8")
+
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.LabelRole, self.label_8)
+
+        self.channels_combo = QComboBox(self.widget)
+        self.channels_combo.setObjectName(u"channels_combo")
+
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.FieldRole, self.channels_combo)
+
+        self.widget_3 = QWidget(self.widget)
+        self.widget_3.setObjectName(u"widget_3")
+        self.horizontalLayout_2 = QHBoxLayout(self.widget_3)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, -1, 0, -1)
+        self.label_5 = QLabel(self.widget_3)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.label_5)
+        self.horizontalLayout_2.addWidget(self.label_5)
 
-        self.gpi_line = QLineEdit(self.widget)
+        self.gpi_line = QLineEdit(self.widget_3)
         self.gpi_line.setObjectName(u"gpi_line")
         self.gpi_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.formLayout.setWidget(3, QFormLayout.ItemRole.FieldRole, self.gpi_line)
+        self.horizontalLayout_2.addWidget(self.gpi_line)
 
-        self.label_6 = QLabel(self.widget)
+        self.label_6 = QLabel(self.widget_3)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(4, QFormLayout.ItemRole.LabelRole, self.label_6)
+        self.horizontalLayout_2.addWidget(self.label_6)
 
-        self.gpo_line = QLineEdit(self.widget)
+        self.gpo_line = QLineEdit(self.widget_3)
         self.gpo_line.setObjectName(u"gpo_line")
         self.gpo_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.formLayout.setWidget(4, QFormLayout.ItemRole.FieldRole, self.gpo_line)
+        self.horizontalLayout_2.addWidget(self.gpo_line)
+
+
+        self.formLayout.setWidget(6, QFormLayout.ItemRole.SpanningRole, self.widget_3)
 
 
         self.verticalLayout.addWidget(self.widget)
@@ -168,6 +196,8 @@ class Ui_Dialog(object):
         self.name_line.setPlaceholderText(QCoreApplication.translate("Dialog", u"Type device name", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><span style=\" font-size:10pt; font-weight:700;\">DEVICE NAME:</span></p></body></html>", None))
         self.label_4.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><span style=\" font-size:10pt; font-weight:700;\">SAMPLERATE:</span></p></body></html>", None))
+        self.label_7.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><span style=\" font-size:10pt; font-weight:700;\">BLOCKSIZE:</span></p></body></html>", None))
+        self.label_8.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><span style=\" font-size:10pt; font-weight:700;\">CHANNELS:</span></p></body></html>", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><span style=\" font-size:10pt; font-weight:700;\">GPI:</span></p></body></html>", None))
         self.gpi_line.setInputMask("")
         self.gpi_line.setPlaceholderText(QCoreApplication.translate("Dialog", u"Type gpi number", None))

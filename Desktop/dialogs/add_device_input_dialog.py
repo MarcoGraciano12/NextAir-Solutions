@@ -47,7 +47,7 @@ class AddDeviceDialog(QDialog):
         self.__logger = logger or getLogger(self.__class__.__name__)
 
         # Center align all combo boxes
-        for combo in [self.ui.devices_combo, self.ui.sample_rate_combo]:
+        for combo in [self.ui.devices_combo, self.ui.sample_rate_combo, self.ui.block_size_combo, self.ui.channels_combo]:
             combo.setItemDelegate(CenterDelegate(combo))
             # Center the displayed text when closed
             combo.setEditable(True)
@@ -62,17 +62,36 @@ class AddDeviceDialog(QDialog):
         self.ui.gpo_line.setValidator(gpo_validator)
 
         # Add placeholder for sample rate combo
-        self.ui.sample_rate_combo.insertItem(0, "Select sample rate")
+        # self.ui.sample_rate_combo.insertItem(0, "Select sample rate")
 
-        # Add placeholder for device name combo
-        self.ui.devices_combo.addItem("Select audio device", -1)
+        # Device name combo
+        self.ui.devices_combo.addItem("Select audio device", None)
+        self.ui.devices_combo.setCurrentIndex(0)
 
-        # Populate sample rates
+        # Samplerate combo
+        self.ui.sample_rate_combo.addItem("Select sample rate", None)
         self.ui.sample_rate_combo.addItem("44100", 44100)
         self.ui.sample_rate_combo.addItem("48000", 48000)
+        self.ui.sample_rate_combo.setCurrentIndex(0)
+
+        # Blocksize combo
+        self.ui.block_size_combo.addItem("Select block size", None)
+        self.ui.block_size_combo.addItem("512", 512)
+        self.ui.block_size_combo.addItem("1024", 1024)
+        self.ui.block_size_combo.addItem("2048", 2048)
+        self.ui.block_size_combo.addItem("4096", 4096)
+        self.ui.block_size_combo.setCurrentIndex(0)
+
+        # Channels combo
+        self.ui.channels_combo.addItem("Select channels", None)
+        self.ui.channels_combo.addItem("1", 1)
+        self.ui.channels_combo.addItem("2", 2)
+        self.ui.channels_combo.setCurrentIndex(0)
 
         # Connect sample_rate selection to device loading
+        # self.ui.devices_combo.activated.connect(self.load_audio_devices)
         self.ui.sample_rate_combo.activated.connect(self.load_audio_devices)
+        self.ui.channels_combo.activated.connect(self.load_audio_devices)
 
         # Connect buttons
         self.ui.create_button.clicked.connect(self.__validate_and_accept)
@@ -87,7 +106,11 @@ class AddDeviceDialog(QDialog):
         sample_rate = self.ui.sample_rate_combo.currentData()
 
         if not sample_rate:
-            self.__logger.warning("No sample rate selected")
+            return
+
+        channels = self.ui.channels_combo.currentData()
+
+        if not channels:
             return
 
         try:
@@ -96,15 +119,11 @@ class AddDeviceDialog(QDialog):
             self.ui.devices_combo.clear()
 
             # Add placeholder as first item
-            self.ui.devices_combo.addItem("Select audio device", -1)
+            self.ui.devices_combo.addItem("Select audio device", None)
 
             for idx, device in enumerate(devices):
-                if device['default_samplerate'] == sample_rate and device['max_input_channels'] > 0:
-                    device_name = device['name']
-                    self.ui.devices_combo.addItem(device_name, idx)
-
-            if self.ui.devices_combo.count() == 0:
-                QMessageBox.warning(self, "No Devices", f"No input devices found for {sample_rate}Hz")
+                if device['default_samplerate'] == sample_rate and device['max_input_channels'] >= channels:
+                    self.ui.devices_combo.addItem(device['name'], idx)
 
         except Exception as error:
             self.__logger.error(f"Failed to load audio devices: {error}")
@@ -119,15 +138,23 @@ class AddDeviceDialog(QDialog):
         name = self.ui.name_line.text().strip()
 
         if not name:
-            QMessageBox.warning(self, "Validation Error", "Name is required")
+            QMessageBox.warning(self, "Missing Information", "Please enter a name for the device")
             return
 
-        if self.ui.devices_combo.currentIndex() == 0:
-            QMessageBox.warning(self, "Validation Error", "Device name must be selected")
+        if self.ui.devices_combo.currentData() is None:
+            QMessageBox.warning(self, "Missing Information", "Please select an audio device from the list")
             return
 
-        if self.ui.sample_rate_combo.currentIndex() == 0:
-            QMessageBox.warning(self, "Validation Error", "Sample rate must be selected")
+        if self.ui.sample_rate_combo.currentData() is None:
+            QMessageBox.warning(self, "Missing Information", "Please select a sample rate")
+            return
+
+        if self.ui.block_size_combo.currentData() is None:
+            QMessageBox.warning(self, "Missing Information", "Please select a block size")
+            return
+
+        if self.ui.channels_combo.currentData() is None:
+            QMessageBox.warning(self, "Missing Information", "Please select the number of channels")
             return
 
         self.accept()
@@ -142,6 +169,8 @@ class AddDeviceDialog(QDialog):
             'name': self.ui.name_line.text().strip(),
             'device_name': self.ui.devices_combo.currentText(),
             'sample_rate': int(self.ui.sample_rate_combo.currentText()),
+            'block_size': int(self.ui.block_size_combo.currentText()),
+            'channels': int(self.ui.channels_combo.currentText()),
             'gpi': int(self.ui.gpi_line.text()) if self.ui.gpi_line.text() else None,
             'gpo': int(self.ui.gpo_line.text()) if self.ui.gpo_line.text() else None
         }

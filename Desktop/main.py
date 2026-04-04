@@ -194,7 +194,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         :return: None
         """
-        columns = ["ID", "NAME", "DEVICE NAME", "SAMPLERATE", "GPI", "GPO", "ACTIONS"]
+        columns = ["ID", "NAME", "DEVICE", "SAMPLERATE", "BLOCKSIZE", "CHANNELS", "GPI", "GPO", "ACTIONS"]
 
         self.device_table.setColumnCount(len(columns))
         self.device_table.setHorizontalHeaderLabels(columns)
@@ -222,17 +222,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(3, QHeaderView.Fixed)
         self.device_table.setColumnWidth(3, 140)
 
-        # GPI column: small fixed width for numeric values
+        # Blocksize column: small fixed width for numeric values
         header.setSectionResizeMode(4, QHeaderView.Fixed)
-        self.device_table.setColumnWidth(4, 90)
+        self.device_table.setColumnWidth(4, 140)
+
+        # Channels column: small fixed width for numeric values
+        header.setSectionResizeMode(5, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(5, 130)
+
+        # GPI column: small fixed width for numeric values
+        header.setSectionResizeMode(6, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(6, 80)
 
         # GPO column: small fixed width for numeric values
-        header.setSectionResizeMode(5, QHeaderView.Fixed)
-        self.device_table.setColumnWidth(5, 90)
+        header.setSectionResizeMode(7, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(7, 80)
 
         # Actions column: fixed width to fit Edit/Delete buttons
-        header.setSectionResizeMode(6, QHeaderView.Fixed)
-        self.device_table.setColumnWidth(6, 180)
+        header.setSectionResizeMode(8, QHeaderView.Fixed)
+        self.device_table.setColumnWidth(8, 180)
 
         self.device_table.verticalHeader().setDefaultSectionSize(40)
 
@@ -256,15 +264,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.__set_centered_item(self.device_table, row, 3, device_input.sample_rate)
 
-        if device_input.gpi:
-            self.__set_centered_item(self.device_table, row, 4, device_input.gpi)
-        else:
-            self.__set_centered_item(self.device_table, row, 4, "-")
+        self.__set_centered_item(self.device_table, row, 4, device_input.block_size)
 
-        if device_input.gpo:
-            self.__set_centered_item(self.device_table, row, 5, device_input.gpo)
+        self.__set_centered_item(self.device_table, row, 5, device_input.channels)
+
+        if device_input.gpi is not None:
+            self.__set_centered_item(self.device_table, row, 6, device_input.gpi)
         else:
-            self.__set_centered_item(self.device_table, row, 5, "-")
+            self.__set_centered_item(self.device_table, row, 6, "-")
+
+        if device_input.gpo is not None:
+            self.__set_centered_item(self.device_table, row, 7, device_input.gpo)
+        else:
+            self.__set_centered_item(self.device_table, row, 7, "-")
 
         # Get reference for delete button
         name_item = self.device_table.item(row, 1)
@@ -282,7 +294,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         actions_layout.addWidget(delete_btn)
         actions_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.device_table.setCellWidget(row, 6, actions_widget)
+        self.device_table.setCellWidget(row, 8, actions_widget)
 
     def __add_device_input_to_table(self, device_input):
         """

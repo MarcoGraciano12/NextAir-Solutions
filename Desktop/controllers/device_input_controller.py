@@ -29,13 +29,15 @@ class DeviceInputController:
         """
         self.__logger = logger or getLogger(self.__class__.__name__)
 
-    def create(self, name: str, device_name: str, sample_rate: int, gpi: int, gpo: int):
+    def create(self, name: str, device_name: str, sample_rate: int, block_size: int, channels: int, gpi: int, gpo: int):
         """
         Creates a new audio input device configuration.
 
         :param name: Unique identifier for the device
         :param device_name: Physical device name from the OS
         :param sample_rate: Audio sample rate in Hz
+        :param block_size: Audio block size in frames
+        :param channels: 1 for mono, 2 for stereo
         :param gpi: General Purpose Input pin number
         :param gpo: General Purpose Output pin number
         :return: Tuple (success: bool, result: DeviceInput or error message)
@@ -54,6 +56,8 @@ class DeviceInputController:
                     name=name,
                     device_name=device_name,
                     sample_rate=sample_rate,
+                    block_size=block_size,
+                    channels=channels,
                     gpi=gpi,
                     gpo=gpo
                 )

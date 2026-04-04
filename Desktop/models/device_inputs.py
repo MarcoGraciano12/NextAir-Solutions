@@ -22,8 +22,10 @@ class DeviceInput(Base):
     :param name: Unique identifier for the input device
     :param device_name: Physical device name as recognized by the OS
     :param sample_rate: Audio sample rate in Hz (e.g., 44100, 48000)
+    :param block_size: Audio block size in frames
+    :param channels: 1 for mono, 2 for stereo
     :param gpi: General Purpose Input pin number
-    :param gpio: General Purpose Output pin number
+    :param gpo: General Purpose Output pin number
     """
     __tablename__ = 'device_inputs'
 
@@ -31,6 +33,8 @@ class DeviceInput(Base):
     name = Column(String(255), unique=True, nullable=False)
     device_name = Column(String(255), unique=True, nullable=False)
     sample_rate = Column(Integer, nullable=False)
+    block_size = Column(Integer, nullable=False)
+    channels = Column(Integer, nullable=False)
     gpi = Column(Integer, nullable=True)
     gpo = Column(Integer, nullable=True)
 
@@ -46,6 +50,8 @@ class DeviceInput(Base):
             'name': self.name,
             'device_name': self.device_name,
             'sample_rate': self.sample_rate,
+            'block_size': self.block_size,
+            'channels': self.channels,
             'gpi': self.gpi,
             'gpio': self.gpio
         }
