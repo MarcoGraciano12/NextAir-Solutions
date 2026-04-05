@@ -338,7 +338,7 @@ class Manager:
         if not success:
             return False, stream
 
-        return self.__transmission.start_transmission(**stream.to_dict())
+        return self.__transmission.start_transmission(**(stream.to_dict() | stream.broadcast.to_dict()))
 
     def stop_transmission(self, stream_name: str):
         """

@@ -11,7 +11,7 @@ import logging
 from manager import Manager
 from PySide6.QtCore import Qt
 from PySide6.QtCore import QSettings
-from PySide6.QtGui import QCloseEvent
+from PySide6.QtGui import QCloseEvent, QFont
 from logging import Logger, getLogger
 from qt_material import apply_stylesheet
 from resources.view import Ui_MainWindow
@@ -20,6 +20,8 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QPushButton, QTableWidget, QTableWidgetItem, QHBoxLayout, QMessageBox, QDialog,
     QHeaderView, QFileDialog
 )
+
+
 
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -60,6 +62,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.__setup_streams_table()
         self.__load_streams_table()
 
+        self.__setup_transmission_table()
+        self.__load_transmissions_table()
+
         self.login_button.pressed.connect(self.login)
         self.logout_button.pressed.connect(self.logout)
 
@@ -97,6 +102,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Search when pressing enter the line edit
         self.search_stream_line.returnPressed.connect(self.search_streams)
         self.stations_combo.activated.connect(self.__on_stations_combo_selected)
+        # ==============================================================================================================
+        # STREAMS ACTIONS
+        # ==============================================================================================================
+        # self.start_transmission_button.clicked.connect(self.start_transmission)
         # ==============================================================================================================
         # SETTINGS ACTIONS
         # ==============================================================================================================
@@ -888,11 +897,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # NAME column: small fixed width for numeric values
         header.setSectionResizeMode(1, QHeaderView.Stretch)
-        # self.streams_table.setColumnWidth(0, 60)
 
         # URL column: small fixed width for numeric values
         header.setSectionResizeMode(2, QHeaderView.Stretch)
-        # self.streams_table.setColumnWidth(0, 60)
 
         # USER column: small fixed width for numeric values
         header.setSectionResizeMode(3, QHeaderView.Fixed)
@@ -1052,6 +1059,207 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ==================================================================================================================
     # TRANSMISSION
     # ==================================================================================================================
+    def __setup_transmission_table(self):
+        """
+        Configure the transmission table widget with columns and display settings.
+
+        Sets up column headers, disables editing, enables row selection,
+        and configures column widths.
+
+        :return: None
+        """
+        # Define column headers for the table
+        columns = ["NAME", "URL", "STATUS", "PLAYING", "ACTIONS"]
+
+        self.transmissions_table.setColumnCount(len(columns))
+        self.transmissions_table.setHorizontalHeaderLabels(columns)
+
+        # Prevent direct cell editing - use Edit button instead
+        self.transmissions_table.setEditTriggers(QTableWidget.NoEditTriggers)
+
+        # Select entire row when clicking any cell
+        self.transmissions_table.setSelectionBehavior(QTableWidget.SelectRows)
+
+        # Configure column widths
+        header = self.transmissions_table.horizontalHeader()
+
+        # Name column: stretches to fill available space
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+
+        # URL column: stretches to fill available space
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+
+        # Status column: fixed width for displaying stream state (Active/Inactive)
+        header.setSectionResizeMode(2, QHeaderView.Fixed)
+        self.transmissions_table.setColumnWidth(2, 100)
+
+        # Playing column: stretches to show currently broadcasting content
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+
+        # Actions column: fixed width to fit Start/Stop buttons
+        header.setSectionResizeMode(4, QHeaderView.Fixed)
+        self.transmissions_table.setColumnWidth(4, 240)
+
+        self.transmissions_table.verticalHeader().setDefaultSectionSize(40)
+
+    def __create_transmission_row(self, row: int, stream):
+        """
+        Create and populate a single transmission row in the table.
+
+        Sets up table items with centered text and action buttons for
+        the specified row index.
+
+        :param row: Table row index to populate
+        :param stream: Stream object with data to display
+        :return: None
+        """
+        # Stream name (column 0)
+        self.__set_centered_item(self.transmissions_table, row, 0, stream.stream_name)
+
+        # Broadcast URL (column 1)
+        self.__set_centered_item(self.transmissions_table, row, 1, stream.broadcast.url)
+
+        # Stream status - starts inactive (column 2)
+        self.__set_centered_item(self.transmissions_table, row, 2, "Stopped")
+
+        # Currently playing content - empty at start (column 3)
+        self.__set_centered_item(self.transmissions_table, row, 3, "-")
+
+        # Get transmission reference
+        transmission_item = self.transmissions_table.item(row, 0)
+
+        # Create action buttons for stream control
+        start_btn = QPushButton("▶")
+        start_btn.setStyleSheet("font-size: 25px;")
+        start_btn.clicked.connect(lambda checked, item = transmission_item: self.start_transmission(item))
+
+        stop_btn = QPushButton("■")
+        stop_btn.setStyleSheet("font-size: 25px; padding-bottom: 7px;")
+        stop_btn.clicked.connect(lambda checked, item=transmission_item: self.stop_transmission(item))
+
+        reload_btn = QPushButton("⟳")
+        reload_btn.setStyleSheet("font-size: 25px; padding-bottom: 6px;")
+
+        # Create widget container for buttons
+        actions_widget = QWidget()
+        actions_layout = QHBoxLayout(actions_widget)
+        actions_layout.addWidget(start_btn)
+        actions_layout.addWidget(stop_btn)
+        actions_layout.addWidget(reload_btn)
+        actions_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Add actions widget to last column (column 4)
+        self.transmissions_table.setCellWidget(row, 4, actions_widget)
+
+    def __add_transmission_to_table(self, stream):
+        """
+        Add a new transmission row to the table.
+
+        Inserts a new row at the end of the table and populates it
+        with stream data and action buttons.
+
+        :param stream: Stream object containing transmission data
+        :return: None
+        """
+        # Insert new row at the end
+        row = self.transmissions_table.rowCount()
+        self.transmissions_table.insertRow(row)
+
+        # Create row using common method
+        self.__create_transmission_row(row, stream)
+
+    def __display_transmissions(self, transmissions: list):
+        """
+        Display all transmissions in the table.
+
+        Clears existing rows and populates the table with the provided
+        transmission list.
+
+        :param transmissions: List of stream objects to display
+        :return: None
+        """
+        # Clear and prepare table
+        self.transmissions_table.setRowCount(0)
+        self.transmissions_table.setRowCount(len(transmissions))
+
+        # Create each row using common method
+        for i, transmission in enumerate(transmissions):
+            self.__create_transmission_row(i, transmission)
+
+    def __load_transmissions_table(self):
+        """
+        Load and display all transmissions from database into the transmissions table widget.
+
+        Populates the table with stream data and creates action buttons (Start/Stop/Reload)
+        for each row. Clears existing rows before loading new data.
+
+        :return: None
+        """
+        try:
+            streams = self.__manager.get_all_streams()
+
+            if not streams:
+                self.__logger.warning("No transmissions found in database")
+                self.statusbar.showMessage("No transmissions available", 3000)
+                return
+
+            # Use common display method to populate table
+            self.__display_transmissions(streams)
+
+            self.__logger.info(f"Loaded {len(streams)} transmissions into table")
+            self.statusbar.showMessage(f"{len(streams)} transmissions loaded successfully", 2000)
+
+        except Exception as error:
+            self.__logger.error(f"Failed to load transmissions table: {error}")
+            self.statusbar.showMessage("Error loading transmissions. Check logs for details.", 5000)
+
+    def start_transmission(self, transmission_item: QTableWidgetItem):
+        """
+        Start a transmission stream.
+
+        Retrieves the stream name from the table item and initiates
+        the transmission process through the manager. Updates the
+        status column on success.
+
+        :param transmission_item: Table item containing the stream name
+        :return: None
+        """
+        row = self.transmissions_table.row(transmission_item)
+        name = transmission_item.text()
+
+        success, msg = self.__manager.start_transmission(name)
+
+        if not success:
+            self.statusbar.showMessage(f"Failed to start {name}: {msg}", 5000)
+            return
+
+        # Update status to Active
+        self.__set_centered_item(self.transmissions_table, row, 2, "Active")
+        self.statusbar.showMessage(f"{name} transmission started.", 2000)
+
+    def stop_transmission(self, transmission_item: QTableWidgetItem):
+        """
+        Stop a transmission stream.
+
+        Retrieves the stream name from the table item and stops
+        the transmission process through the manager. Updates the
+        status column on success.
+
+        :param transmission_item: Table item containing the stream name
+        :return: None
+        """
+        row = self.transmissions_table.row(transmission_item)
+        name = transmission_item.text()
+
+        success, msg = self.__manager.stop_transmission(name)
+
+        if not success:
+            self.statusbar.showMessage(f"Failed to stop {name}: {msg}", 5000)
+            return
+
+        # Update status to Stopped
+        self.__set_centered_item(self.transmissions_table, row, 2, "Stopped")
+        self.statusbar.showMessage(f"{name} transmission stopped.", 2000)
 
     # ==================================================================================================================
     # SETTINGS ACTIONS

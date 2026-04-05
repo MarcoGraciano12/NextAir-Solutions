@@ -435,6 +435,62 @@ class Ui_MainWindow(object):
         self.menu_tab.addTab(self.streams, "")
         self.transmissions = QWidget()
         self.transmissions.setObjectName(u"transmissions")
+        self.verticalLayout_10 = QVBoxLayout(self.transmissions)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.widget_15 = QWidget(self.transmissions)
+        self.widget_15.setObjectName(u"widget_15")
+        self.widget_15.setMaximumSize(QSize(16777215, 100))
+        self.horizontalLayout_8 = QHBoxLayout(self.widget_15)
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.horizontalSpacer_10 = QSpacerItem(158, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_8.addItem(self.horizontalSpacer_10)
+
+        self.search_transmission_line = QLineEdit(self.widget_15)
+        self.search_transmission_line.setObjectName(u"search_transmission_line")
+        self.search_transmission_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_8.addWidget(self.search_transmission_line)
+
+        self.search_transmission_button = QPushButton(self.widget_15)
+        self.search_transmission_button.setObjectName(u"search_transmission_button")
+
+        self.horizontalLayout_8.addWidget(self.search_transmission_button)
+
+        self.line_18 = QFrame(self.widget_15)
+        self.line_18.setObjectName(u"line_18")
+        self.line_18.setFrameShape(QFrame.Shape.VLine)
+        self.line_18.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_8.addWidget(self.line_18)
+
+        self.start_transmission_button = QPushButton(self.widget_15)
+        self.start_transmission_button.setObjectName(u"start_transmission_button")
+
+        self.horizontalLayout_8.addWidget(self.start_transmission_button)
+
+
+        self.verticalLayout_10.addWidget(self.widget_15)
+
+        self.line_17 = QFrame(self.transmissions)
+        self.line_17.setObjectName(u"line_17")
+        self.line_17.setFrameShape(QFrame.Shape.HLine)
+        self.line_17.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.verticalLayout_10.addWidget(self.line_17)
+
+        self.widget_16 = QWidget(self.transmissions)
+        self.widget_16.setObjectName(u"widget_16")
+        self.gridLayout_9 = QGridLayout(self.widget_16)
+        self.gridLayout_9.setObjectName(u"gridLayout_9")
+        self.transmissions_table = QTableWidget(self.widget_16)
+        self.transmissions_table.setObjectName(u"transmissions_table")
+
+        self.gridLayout_9.addWidget(self.transmissions_table, 0, 0, 1, 1)
+
+
+        self.verticalLayout_10.addWidget(self.widget_16)
+
         self.menu_tab.addTab(self.transmissions, "")
         self.SETTINGS = QWidget()
         self.SETTINGS.setObjectName(u"SETTINGS")
@@ -588,7 +644,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 974, 33))
+        self.menubar.setGeometry(QRect(0, 0, 974, 42))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -597,7 +653,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(1)
-        self.menu_tab.setCurrentIndex(1)
+        self.menu_tab.setCurrentIndex(4)
         self.tabWidget.setCurrentIndex(0)
 
 
@@ -632,6 +688,9 @@ class Ui_MainWindow(object):
         self.add_stream_button.setText(QCoreApplication.translate("MainWindow", u"ADD STREAM", None))
         self.refresh_streams_table_button.setText(QCoreApplication.translate("MainWindow", u"REFRESH TABLE", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.streams), QCoreApplication.translate("MainWindow", u"STREAMS", None))
+        self.search_transmission_line.setPlaceholderText(QCoreApplication.translate("MainWindow", u" STREAM NAME", None))
+        self.search_transmission_button.setText(QCoreApplication.translate("MainWindow", u"SEARCH", None))
+        self.start_transmission_button.setText(QCoreApplication.translate("MainWindow", u"START TRANSMISSION", None))
         self.menu_tab.setTabText(self.menu_tab.indexOf(self.transmissions), QCoreApplication.translate("MainWindow", u"TRANSMISSION", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\">SELECT APP THEME: </p></body></html>", None))
         self.theme_combo.setItemText(0, QCoreApplication.translate("MainWindow", u"light_amber.xml", None))
