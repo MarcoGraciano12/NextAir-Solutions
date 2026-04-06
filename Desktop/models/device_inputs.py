@@ -53,5 +53,5 @@ class DeviceInput(Base):
             'block_size': self.block_size,
             'channels': self.channels,
             'gpi': self.gpi,
-            'gpio': self.gpio
+            'gpo': self.gpo
         }

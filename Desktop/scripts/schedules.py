@@ -192,9 +192,6 @@ def update_schedule_block(external_id: int, stream_id: int, broadcast_day: datet
     try:
         data = get_playlist_block(external_id=external_id, date=broadcast_day, hour=hour)
 
-        print(data)
-        print(type(data))
-
         if not data:
             __logger.warning(f"No playlist data found for external_id {external_id}, hour {hour}")
             return None

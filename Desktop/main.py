@@ -51,6 +51,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Streaming Operations Controller
         self.__manager = Manager()
+        self.__manager.init_subjects()
 
         # Setup Tables
         self.__setup_device_table()

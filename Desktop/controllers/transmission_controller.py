@@ -13,223 +13,139 @@ from threading import Thread, Lock, Event
 from scripts import get_weekday_sources, update_sources, update_schedule_block, get_schedule_block
 
 
-# class Transmission:
-#     """
-#     Audio stream managing encoding and broadcasting operations.
-#     """
-#
-#     def __init__(self, stream_id: int, stream_name: str, external_id: int, logger: Logger = None, **kwargs):
-#         """
-#         Initialize stream instance.
-#
-#         :param stream_id: Stream unique identifier
-#         :param stream_name: Stream name
-#         :param external_id: External system identifier
-#         :param logger: Logger instance
-#         :return: None
-#         """
-#         self.__broadcast = None
-#         self.__encoder = None
-#         self.__observer = None
-#
-#         self.__stream_thread = None
-#         self.__stop_stream = Event()
-#         self.__stream_lock = Lock()
-#
-#         self.__stream_id = stream_id
-#         self.__stream_name = stream_name
-#         self.__external_id = external_id
-#         self.__logger = logger or getLogger(self.__stream_name)
-#
-#     @property
-#     def stream_id(self) -> int:
-#         """
-#         Get stream ID.
-#         """
-#         return self.__stream_id
-#
-#     @property
-#     def stream_name(self) -> str:
-#         """
-#         Get stream name.
-#         """
-#         return self.__stream_name
-#
-#     @stream_name.setter
-#     def stream_name(self, value: str):
-#         """
-#         Set stream name.
-#
-#         :param value: New stream name
-#         """
-#         self.__stream_name = value
-#
-#     @property
-#     def external_id(self) -> int:
-#         """
-#         Get external ID.
-#         """
-#         return self.__external_id
-#
-#     @external_id.setter
-#     def external_id(self, value: int):
-#         """
-#         Set external ID.
-#
-#         :param value: New external ID
-#         """
-#         self.__external_id = value
-#
-#     def __str__(self) -> str:
-#         """
-#         String representation of stream.
-#
-#         :return: Formatted string with stream attributes
-#         """
-#         return f"stream_name: {self.__stream_name}, external_id: {self.__external_id}, observer: {self.__observer}"
-#
-#     # ==================================================================================================================
-#     # TRANSMISSION
-#     # ==================================================================================================================
-#
-#     def __commercial_transition(self):
-#         pass
-#
-#     def __manual_transition(self):
-#         pass
-#
-#     def __automatic_transition(self):
-#         pass
-#
-#     def __transition_core(self):
-#         pass
-#
-#     def __init_transmission(self, date: datetime):
-#         """
-#         Initialize transmission by loading or updating sources and playlist.
-#
-#         :param date: Datetime to initialize
-#         :return: Tuple of (sources, playlist) or None if failed
-#         """
-#         # Try to get sources from database
-#         sources = get_weekday_sources(self.__stream_id, date.weekday())
-#
-#         if not sources:
-#             # Sources not found, fetch and update from external source
-#             sources = update_sources(self.__external_id, self.__stream_id, date.weekday(), date)
-#
-#             if not sources:
-#                 # Failed to update sources
-#                 return None
-#
-#         # Try to get playlist block from database
-#         playlist = get_schedule_block(self.__stream_id, date, date.hour)
-#
-#         if not playlist:
-#             # Playlist not found, fetch and update from external source
-#             playlist = update_schedule_block(self.__external_id, self.__stream_id, date, date.hour)
-#
-#             if not playlist:
-#                 # Failed to update playlist
-#                 return None
-#
-#         # Return both sources and playlist
-#         return sources, playlist
-#
-#     @property
-#     def is_running(self):
-#         """
-#         Check if stream is currently running.
-#
-#         :return: True if running, False otherwise
-#         """
-#         return not self.__stop_stream.is_set()
-#
-#     def __loop(self):
-#         """
-#         Main streaming loop.
-#
-#         :return: True if completed successfully, False on error
-#         """
-#         try:
-#             now = datetime.now()
-#
-#             # Initialize transmission data
-#             result = self.__init_transmission(now)
-#
-#             if not result:
-#                 # Failed to initialize transmission
-#                 self.__logger.error("Failed to initialize transmission")
-#                 self.__stop_stream.set()
-#                 return  # O lo que corresponda
-#
-#             # Unpack sources and playlist
-#             sources, playlist = result
-#
-#             while not self.__stop_stream.is_set():
-#                 for source in sources:
-#                     print(source.to_dict())
-#
-#                 for item in playlist:
-#                     print(item.to_dict())
-#
-#                 self.__stop_stream.wait(10)
-#
-#         except Exception as e:
-#             self.__logger.error(f"Stream loop error: {e}")
-#             return False
-#
-#         finally:
-#             # Cleanup resources here (close connections, files, etc.)
-#             self.__logger.info("Stream loop stopped")
-#
-#         return True
-#
-#     def start(self):
-#         """
-#         Start audio streaming to broadcast server.
-#
-#         :return: tuple
-#         """
-#         with self.__stream_lock:
-#             # Check if stream is already active
-#             if self.__stream_thread is not None and self.__stream_thread.is_alive():
-#                 self.__logger.warning("Stream already running")
-#                 return False, "Stream already running"
-#
-#             # Reset stop signal and create new thread
-#             self.__stop_stream.clear()
-#             self.__stream_thread = Thread(target=self.__loop, daemon=False)
-#             self.__stream_thread.start()
-#
-#             self.__logger.info("Stream started successfully")
-#             return True, None
-#
-#     def stop(self):
-#         """
-#         Stop audio streaming gracefully.
-#
-#         :return: Tuple
-#         """
-#         with self.__stream_lock:
-#             # Check if stream is running
-#             if self.__stream_thread is None or not self.__stream_thread.is_alive():
-#                 self.__logger.warning("Stream not running")
-#                 return False, "Stream not running"
-#
-#             # Signal thread to stop
-#             self.__stop_stream.set()
-#
-#         # Wait for thread to finish (outside lock to avoid deadlock)
-#         self.__stream_thread.join()
-#         self.__logger.info("Stream stopped Successfully")
-#         return True, None
-#
-#     def restart(self):
-#         pass
-#
-#     def reload(self):
-#         pass
+class Schedule:
+
+    def __init__(self, stream_id: int, external_id: int, logger: Logger = None):
+        """
+        :param external_id: External system identifier
+        """
+        self.stream_id = stream_id
+        self.external_id = external_id
+
+        self.__sources = []
+        self.__playlist = []
+
+        # Thread management and synchronization primitives
+        self.__thread = None
+        self.__lock = Lock()
+        self.__stop_thread = Event()
+        self.__logger = logger or getLogger(self.__class__.__name__)
+
+    def get_source(self):
+        """
+        Get a copy of the current sources list.
+
+        :return: Copy of sources list or None if not initialized
+        """
+        with self.__lock:
+            return self.__sources.copy() if self.__sources else None
+
+    def get_playlist(self):
+        """
+        Get a copy of the current playlist.
+
+        :return: Copy of playlist or None if not initialized
+        """
+        with self.__lock:
+            return self.__playlist.copy() if self.__playlist else None
+
+    def __init_schedule(self):
+        """
+        Initialize schedule configuration from database or external source.
+
+        Attempts to load sources and playlist from database first. If not found,
+        fetches and updates from external source.
+
+        :return: Tuple (sources, playlist) or (None, None) if initialization fails
+        """
+        try:
+            now = datetime.now()
+
+            # Get or fetch sources from database/external
+            sources = get_weekday_sources(self.stream_id, now.weekday())
+            if not sources:
+                sources = update_sources(self.external_id, self.stream_id, now.weekday(), now)
+                if not sources:
+                    return None, None
+
+            # Get or fetch playlist block from database/external
+            playlist = get_schedule_block(self.stream_id, now, now.hour)
+            if not playlist:
+                playlist = update_schedule_block(self.external_id, self.stream_id, now, now.hour)
+
+            return sources, playlist
+
+        except Exception as error:
+            self.__logger.error(f"Failed to init schedule: {error}")
+            return None, None
+
+    @property
+    def is_running(self):
+        """
+        Check if thread is currently running.
+
+        :return: True if running, False otherwise
+        """
+        return not self.__stop_thread.is_set()
+
+    def start(self):
+        """
+        Start the schedule thread and initialize schedule configuration.
+
+        :return: Tuple (success: bool, error_message: str or None)
+        """
+        with self.__lock:
+            # Check if stream is already active
+            if self.__thread is not None and self.__thread.is_alive():
+                self.__logger.warning("Schedule thread already running")
+                return False, "Schedule Thread already running"
+
+            self.__sources, self.__playlist = self.__init_schedule()
+
+            if not self.__sources:
+                return False, "Failed to initialize schedule sources"
+
+            # Reset stop signal and create new thread
+            self.__stop_thread.clear()
+            self.__thread = Thread(target=self.__loop, daemon=False)
+            self.__thread.start()
+
+            self.__logger.info("Schedule thread started successfully")
+            return True, None
+
+    def stop(self):
+        with self.__lock:
+            # Check if stream is running
+            if self.__thread is None or not self.__thread.is_alive():
+                self.__logger.warning("Schedule thread not running")
+                return False, "Schedule thread not running"
+
+            # Signal thread to stop
+            self.__stop_thread.set()
+
+        # Wait for thread to finish (outside lock to avoid deadlock)
+        self.__thread.join()
+        self.__logger.info("Schedule thread stopped Successfully")
+        return True, None
+
+    def __loop(self):
+        try:
+
+            while not self.__stop_thread.is_set():
+
+                self.__stop_thread.wait(10)
+
+        except Exception as e:
+            self.__logger.error(f"Schedule loop error: {e}")
+            return False
+
+        finally:
+            # Cleanup resources here (close connections, files, etc.)
+            self.__logger.info("schedule loop stopped")
+
+        return True
+
+
 
 class Transmission:
     """
@@ -237,7 +153,8 @@ class Transmission:
     """
 
     def __init__(self, stream_id: int, station_id: int, stream_name: str, external_id: int, url: str, user: str,
-            password: str, channels: int, sample_rate: int, block_size: int, bitrate: str, logger: Logger = None, **kwargs):
+                 password: str, channels: int, sample_rate: int, block_size: int, bitrate: str, subjects,
+                 logger: Logger = None, **kwargs):
         """
         Initialize stream instance.
 
@@ -252,25 +169,26 @@ class Transmission:
         :param sample_rate: Audio sample rate
         :param block_size: Audio block size
         :param bitrate: Audio bitrate
+        :param subjects: Audio sources
         :param logger: Logger instance
         :return: None
         """
         # Stream identifiers and configuration parameters
-        self.__stream_id = stream_id
-        self.__station_id = station_id
-        self.__stream_name = stream_name
-        self.__external_id = external_id
+        self.stream_id = stream_id
+        self.station_id = station_id
+        self.stream_name = stream_name
+        self.external_id = external_id
 
         # Broadcast server connection settings
-        self.__url = url
-        self.__user = user
-        self.__password = password
+        self.url = url
+        self.user = user
+        self.password = password
 
         # Audio processing parameters
-        self.__bitrate = bitrate
-        self.__channels = channels
-        self.__block_size = block_size
-        self.__sample_rate = sample_rate
+        self.bitrate = bitrate
+        self.channels = channels
+        self.block_size = block_size
+        self.sample_rate = sample_rate
 
         # Logging instance for stream operations
         self.__logger = logger or getLogger(stream_name)
@@ -285,82 +203,9 @@ class Transmission:
         self.__stream_lock = Lock()
         self.__stop_stream = Event()
 
-    @property
-    def stream_id(self) -> int:
-        """
-        Stream unique identifier.
-        """
-        return self.__stream_id
-
-    @property
-    def station_id(self) -> int:
-        """
-        Station identifier.
-        """
-        return self.__station_id
-
-    @property
-    def stream_name(self) -> str:
-        """
-        Stream name.
-        """
-        return self.__stream_name
-
-    @property
-    def external_id(self) -> int:
-        """
-        External system identifier.
-        """
-        return self.__external_id
-
-    @property
-    def url(self) -> str:
-        """
-        Broadcast URL.
-        """
-        return self.__url
-
-    @property
-    def user(self) -> str:
-        """
-        Broadcast user.
-        """
-        return self.__user
-
-    @property
-    def password(self) -> str:
-        """
-        Broadcast password.
-        """
-        return self.__password
-
-    @property
-    def channels(self) -> int:
-        """
-        Audio channels.
-        """
-        return self.__channels
-
-    @property
-    def sample_rate(self) -> int:
-        """
-        Audio sample rate.
-        """
-        return self.__sample_rate
-
-    @property
-    def block_size(self) -> int:
-        """
-        Audio block size.
-        """
-        return self.__block_size
-
-    @property
-    def bitrate(self) -> str:
-        """
-        Audio bitrate.
-        """
-        return self.__bitrate
+        # Audio Sources
+        self.__subjects = subjects
+        self.__schedule = None
 
     def __str__(self) -> str:
         """
@@ -384,27 +229,12 @@ class Transmission:
         :return: True if completed successfully, False on error
         """
         try:
-            # now = datetime.now()
-            #
-            # # Initialize transmission data
-            # result = self.__init_transmission(now)
-            #
-            # if not result:
-            #     # Failed to initialize transmission
-            #     self.__logger.error("Failed to initialize transmission")
-            #     self.__stop_stream.set()
-            #     return  # O lo que corresponda
-            #
-            # # Unpack sources and playlist
-            # sources, playlist = result
 
             while not self.__stop_stream.is_set():
-                # for source in sources:
-                #     print(source.to_dict())
-                #
-                # for item in playlist:
-                #     print(item.to_dict())
-                self.__logger.info(f"Transmission {self.__stream_name} running")
+
+                for source in self.__schedule.get_source():
+                    print(source.to_dict())
+
                 self.__stop_stream.wait(10)
 
         except Exception as e:
@@ -428,6 +258,13 @@ class Transmission:
             if self.__stream_thread is not None and self.__stream_thread.is_alive():
                 self.__logger.warning("Stream already running")
                 return False, "Stream already running"
+
+            self.__schedule = Schedule(self.stream_id, self.external_id, self.__logger)
+
+            success, msg = self.__schedule.start()
+
+            if not success:
+                return False, msg
 
             # Reset stop signal and create new thread
             self.__stop_stream.clear()
@@ -460,15 +297,17 @@ class Transmission:
 
 class TransmissionController:
 
-    def __init__(self, logger: Logger = None):
+    def __init__(self, subjects, logger: Logger = None):
         """
         Initialize station controller.
 
+        :param subjects: Controller instance for managing subjects
         :param logger: Logger instance
         :return: None
         """
-        self.__transmissions = {}
         self.__lock = Lock()
+        self.__transmissions = {}
+        self.__subjects = subjects
         self.__logger = logger or getLogger(self.__class__.__name__)
 
     def start_transmission(self, stream_name: str, **kwargs):
@@ -484,7 +323,7 @@ class TransmissionController:
 
         if not transmission:
             self.__logger.info(f"{stream_name} transmission, not found, build new transmission")
-            transmission = Transmission(stream_name=stream_name, **kwargs)
+            transmission = Transmission(stream_name=stream_name, subjects=self.__subjects, **kwargs)
 
         with self.__lock:
             if stream_name not in self.__transmissions:

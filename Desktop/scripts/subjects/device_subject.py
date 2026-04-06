@@ -26,7 +26,7 @@ class DeviceSubject:
     private and should be accessed through getter and setter methods.
     """
 
-    def __init__(self, name: str, device_name: str, sample_rate: int, block_size: int, channels: int, gpi: int, gpo: int, logger: Logger = None):
+    def __init__(self, name: str, device_name: str, sample_rate: int, block_size: int, channels: int, gpi: int, gpo: int, logger: Logger = None, **Kwargs):
         """
         Initialize audio device configuration.
 
@@ -113,6 +113,14 @@ class DeviceSubject:
         Get General Purpose Output pin number.
         """
         return self.__gpo
+
+    def __str__(self):
+        """
+        String representation of the devuce subject.
+
+        :return: Formatted string with stream subject info
+        """
+        return f"DeviceSubject(name: {self.__name}, observers: {len(self.__observers)}, running: {self.is_active})"
 
     @property
     def is_active(self):

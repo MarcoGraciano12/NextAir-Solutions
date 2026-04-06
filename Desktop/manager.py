@@ -19,19 +19,26 @@ class Manager:
         self.__stations = StationController()
         self.__streams = StreamController()
         self.__broadcast = BroadcastController()
-        self.__transmission = TransmissionController()
+        self.__transmission = TransmissionController(subjects=self.__subjects)
 
         self.__sources = SourcesController()
         self.__playlist = PlaylistController()
 
     def init_subjects(self):
-        success, items = self.__stream_inputs.get_all()
+        """
+        Initialize all device subjects from database records.
 
-        if not success:
-            return False, items
+        :return: None
+        """
+        device_inputs = self.__device_inputs.get_all()
 
-        for item in items:
-            self.__subjects.add_stream_subject(**item.to_dict())
+        if not device_inputs:
+            self.__logger.warning(f"Failed to init device subjects")
+            return
+
+        # Create subject for each device input record
+        for device in device_inputs:
+            self.__subjects.add_device_subject(**device.to_dict())
 
     # ==================================================================================================================
     # STREAM INPUT
