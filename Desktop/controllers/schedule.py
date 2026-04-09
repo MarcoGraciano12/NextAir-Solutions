@@ -25,9 +25,7 @@ class Schedule:
         self.__external_id = external_id
 
         # Main schedule storage (loaded on init)
-        self.sources = None
-        self.playlist = None
-        self.spots = None
+        self.sources, self.playlist, self.spots = {}, {}, []
 
         # Update window configuration
         self.__remaining = remaining
@@ -150,15 +148,18 @@ class Schedule:
             self.__logger.exception(f"Failed to initialize schedule: {e}")
             return False
 
+    # ==================================================================================================================
+    # GET SCHEDULE DATA
+    # ==================================================================================================================
     def get_current_block(self, now: datetime = None):
         """
-        Retrieve and clear pre-loaded current block.
+        Retrieve and clear pre-loaded playlist block for the current hour.
 
-        Returns pre-loaded playlist and spots if available. Always retrieves
-        sources from main storage by hour.
+        Removes past hour blocks and returns active items. Falls back to
+        source if no playlist block is available.
 
         :param now: Datetime to query, defaults to current time
-        :return: Tuple of (sources_list, playlist_list, spots_dict)
+        :return: Tuple of (items_list, None) or (None, error_message)
         """
         try:
             now = now or datetime.now()
@@ -166,33 +167,57 @@ class Schedule:
 
             with self.__lock:
 
-                if not self.playlist:
-                    self.__logger.warning(f"Playlist data is empty.")
-                    return {'status': False, 'message': f'Playlist is empty'}
+                if not self.playlist and not self.sources:
+                    self.__logger.warning("Playlist and source data are empty.")
+                    return None, "No data available"
 
-                for key in range(hour):  # Remove all blocks from past hours
+                # Remove all blocks from past hours
+                for key in range(hour):
                     self.playlist.pop(key, None)
+                    self.sources.pop(key, None)
 
-                block_list = self.playlist.pop(int(hour), None)
+                # Try playlist first, fall back to source
+                block_list = self.playlist.pop(hour, []) or self.sources.pop(hour, [])
 
-                if block_list is None:
-                    self.__logger.warning(f"No playlist block for {hour}.")
-                    return {'status': False, 'message': f'No playlist block for {hour}'}
+                if not block_list:
+                    self.__logger.warning(f"No block found for {hour}.")
+                    return None, f"No block found for {hour}"
 
-                # Filter blocks that start after current time
+                # Filter blocks that have not ended yet
                 items = [item for item in block_list if item[6] > now]
 
                 if not items:
                     self.__logger.warning(f"No active blocks found for {hour}.")
-                    return {'status': False, 'message': 'No active blocks found'}
+                    return None, "No active blocks found"
 
-                self.__logger.info(f"Found {len(items)} size block for {hour}")
-
-                return {'status': True, 'message': 'Current block processed successfully', 'content': items}
+                self.__logger.info(f"Found {len(items)} active blocks for {hour}.")
+                return items, None
 
         except Exception as error:
             self.__logger.exception(f"Failed to get current block: {error}")
-            return {'status': False, 'message': f'Failed to get current block: {error}'}
+            return None, str(error)
+
+    def get_spots(self, start_time: str):
+        """
+        Retrieve spot entries matching the specified start time.
+
+        :param start_time: Start time in "HH:MM:SS" format to filter spots
+        :return: Tuple of (spots_list, None) or (None, error_message)
+        """
+        try:
+            with self.__lock:
+                if not self.spots:
+                    self.__logger.warning("Spot list is empty")
+                    return None, "Spot list is empty"
+
+                spot_list = [spot for spot in self.spots if spot[1] == start_time]
+
+                self.__logger.debug(f"Found {len(spot_list)} spot(s) for {start_time}")
+                return spot_list, None
+
+        except Exception as error:
+            self.__logger.exception(f"Failed to get spots for {start_time}: {error}")
+            return None, str(error)
 
     # ==================================================================================================================
     # SCHEDULE PROCESSING HELPERS
@@ -339,7 +364,7 @@ class Schedule:
 
         except Exception as e:
             self.__logger.error(f"Failed to load sources for {now}: {e}")
-            return None
+            return {}
 
     # ==================================================================================================================
     # PLAYLIST PROCESSING
@@ -410,7 +435,7 @@ class Schedule:
 
         except Exception as e:
             self.__logger.error(f"Failed to load playlist for {now}: {e}")
-            return None, None
+            return {}, []
 
     # ==================================================================================================================
     # FILE PROCESSING
