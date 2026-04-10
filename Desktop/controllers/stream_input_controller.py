@@ -93,11 +93,11 @@ class StreamInputController:
             with Session(engine) as session:
                 stream_inputs = session.query(StreamInput).all()
 
-                return True, stream_inputs
+                return stream_inputs
 
         except Exception as e:
             self.__logger.error(f"Error retrieving stream inputs: {e}")
-            return False, "Error retrieving stream inputs"
+            return None
 
     def get_by_name(self, name: str):
         """

@@ -26,19 +26,42 @@ class Manager:
 
     def init_subjects(self):
         """
-        Initialize all device subjects from database records.
+        Initialize all subjects from database records (devices and streams).
+
+        :return: None
+        """
+        self.__init_device_subjects()
+        self.__init_stream_subjects()
+
+    def __init_device_subjects(self):
+        """
+        Initialize device subjects from database records.
 
         :return: None
         """
         device_inputs = self.__device_inputs.get_all()
 
         if not device_inputs:
-            self.__logger.warning(f"Failed to init device subjects")
+            self.__logger.warning("No device inputs found for subject initialization")
             return
 
-        # Create subject for each device input record
         for device in device_inputs:
             self.__subjects.add_device_subject(**device.to_dict())
+
+    def __init_stream_subjects(self):
+        """
+        Initialize stream subjects from database records.
+
+        :return: None
+        """
+        stream_inputs = self.__stream_inputs.get_all()
+
+        if not stream_inputs:
+            self.__logger.warning("No stream inputs found for subject initialization")
+            return
+
+        for stream in stream_inputs:
+            self.__subjects.add_stream_subject(**stream.to_dict())
 
     # ==================================================================================================================
     # STREAM INPUT
@@ -50,12 +73,12 @@ class Manager:
         :param kwargs: Stream configuration parameters (must include required fields)
         :return: Tuple (success: bool, stream_subject or error_message)
         """
-        success, content = self.__stream_inputs.create(**kwargs)
+        return self.__stream_inputs.create(**kwargs)
 
-        if not success:
-            return False, content
-
-        return self.__subjects.add_stream_subject(**kwargs)
+        # if not success:
+        #     return False, content
+        #
+        # return self.__subjects.add_stream_subject(**kwargs)
 
     def delete_stream_input(self, input_id: int):
         """
@@ -64,12 +87,12 @@ class Manager:
         :param input_id: Database ID of the stream input
         :return: Tuple (success: bool, confirmation or error_message)
         """
-        success, content = self.__stream_inputs.delete(stream_input_id=input_id)
+        return self.__stream_inputs.delete(stream_input_id=input_id)
 
-        if not success:
-            return False, content
-
-        return self.__subjects.remove_stream_subject(name=content.name)
+        # if not success:
+        #     return False, content
+        #
+        # return self.__subjects.remove_stream_subject(name=content.name)
 
     def get_stream_subjects(self):
         return self.__subjects.stream_subjects

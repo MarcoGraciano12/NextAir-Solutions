@@ -22,8 +22,6 @@ from PySide6.QtWidgets import (
 )
 
 
-
-
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
@@ -1429,6 +1427,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception as error:
             self.__logger.error(f"Failed to export streams: {error}")
             QMessageBox.critical(self, "Export Error", f"Failed to export CSV:\n{error}")
+
 
 if __name__ == "__main__":
     #  pyside6-uic mainwindow.ui -o mainwindow.py

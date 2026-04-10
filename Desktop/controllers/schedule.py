@@ -194,7 +194,7 @@ class Schedule:
                 return items, None
 
         except Exception as error:
-            self.__logger.exception(f"Failed to get current block: {error}")
+            self.__logger.error(f"Failed to get current block: {error}")
             return None, str(error)
 
     def get_spots(self, start_time: str):
@@ -440,7 +440,7 @@ class Schedule:
     # ==================================================================================================================
     # FILE PROCESSING
     # ==================================================================================================================
-    def read_csv(self, file_path: str, now: datetime = None):
+    def read_csv(self, file_path: str, now: datetime):
         """
         Read a CSV playlist file and organize items by type.
 

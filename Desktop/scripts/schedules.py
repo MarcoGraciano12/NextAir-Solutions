@@ -5,7 +5,7 @@ from logging import getLogger
 import datetime
 from sqlalchemy.orm import Session
 from typing import List, Tuple, Type, Any
-from .sql_connection import get_sources, get_playlist, get_playlist_block
+from .sql_connection import get_sources
 
 
 __logger = getLogger("Schedules")
@@ -177,29 +177,3 @@ def remove_schedule_block(stream_id: int, broadcast_day: datetime.datetime, hour
     with Session(engine) as session:
         session.query(Playlist).filter(*filters).delete()
         session.commit()
-
-
-def update_schedule_block(external_id: int, stream_id: int, broadcast_day: datetime.datetime, hour: int):
-    """
-    Update playlist block by fetching and replacing data.
-
-    :param external_id: Station external ID
-    :param stream_id: Stream ID
-    :param broadcast_day: Broadcast date
-    :param hour: Hour to filter (0-23)
-    :return: List of created Playlist objects, None on error
-    """
-    try:
-        data = get_playlist_block(external_id=external_id, date=broadcast_day, hour=hour)
-
-        if not data:
-            __logger.warning(f"No playlist data found for external_id {external_id}, hour {hour}")
-            return None
-
-        remove_schedule_block(stream_id=stream_id, broadcast_day=broadcast_day, hour=hour)
-
-        return add_schedule_block(stream_id=stream_id, broadcast_day=broadcast_day, items=data)
-
-    except Exception as error:
-        __logger.error(f"Failed to update schedule block: {error}")
-        return None

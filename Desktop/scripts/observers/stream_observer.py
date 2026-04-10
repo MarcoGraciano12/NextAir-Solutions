@@ -94,6 +94,14 @@ class StreamObserver(Observer):
         """
         return self.__logger
 
+    def __str__(self):
+        """
+        String representation of the stream observer.
+
+        :return: Formatted string with stream observer info
+        """
+        return self.__name
+
     def update(self, frame):
         """
         Receive audio frame from subject and write to encoder.
